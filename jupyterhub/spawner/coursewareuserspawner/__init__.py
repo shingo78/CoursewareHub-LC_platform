@@ -423,7 +423,9 @@ class CoursewareUserSpawner(SwarmSpawner):
     def create_object(self):
         # systemuser image must be started as root
         # relies on NB_UID and NB_USER handling in docker-stacks
-        self.extra_container_spec = {'workdir': self.homedir, 'user': '0'}
+        extra_container_spec = dict(self.extra_container_spec)
+        extra_container_spec.update({'workdir': self.homedir, 'user': '0'})
+        self.extra_container_spec = extra_container_spec
 
         return (yield super(CoursewareUserSpawner, self).create_object())
 

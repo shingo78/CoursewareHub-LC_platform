@@ -3,7 +3,7 @@ import sys
 import yaml
 import json
 import jsonschema
-from docker.types import (RestartPolicy, Placement)
+from docker.types import (RestartPolicy, Placement, Healthcheck)
 from coursewareuserspawner.traitlets import ResourceAllocation
 
 # Configuration file for jupyterhub.
@@ -98,6 +98,17 @@ if 'SPAWNER_CONSTRAINTS' in os.environ:
         )
     })
 c.SwarmSpawner.extra_task_spec = extra_task_spec
+
+extra_container_spec = {
+    'healthcheck': Healthcheck(
+        test='wget -O- --no-verbose --tries=1 http://localhost:8888${JUPYTERHUB_SERVICE_PREFIX:-/}api || exit 1',
+        interval=15 * 1000000000,
+        timeout=3 * 1000000000,
+        start_period=5 * 1000000000,
+        retries=3
+    )
+}
+c.SwarmSpawner.extra_container_spec = extra_container_spec
 
 if 'JUPYTERHUB_SINGLEUSER_APP' in os.environ:
     c.Spawner.environment = {
