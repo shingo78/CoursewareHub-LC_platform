@@ -166,8 +166,8 @@ class Registry(LoggingConfigurable):
     async def list_images(self):
         images = []
         async with aiohttp.ClientSession(auth=self._get_auth()) as session:
-            self.log.debug('registry host=%s, registry url=%s', self.host, url)
             url = self._get_registry_url()
+            self.log.debug('registry host=%s, registry url=%s', self.host, url)
             repo_names = await _get_repos(session, url)
 
             tasks = []
