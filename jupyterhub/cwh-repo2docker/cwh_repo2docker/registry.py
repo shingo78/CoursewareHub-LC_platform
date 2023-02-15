@@ -141,7 +141,7 @@ class Registry(LoggingConfigurable):
 
     def _get_registry_url(self):
         scheme = 'https' if not self.insecure else 'http'
-        return f'{scheme}://{self.host}/'
+        return f'{scheme}://{self.host}'
 
     def _get_auth(self):
         return aiohttp.BasicAuth(self.username, self.password)
@@ -166,6 +166,7 @@ class Registry(LoggingConfigurable):
     async def list_images(self):
         images = []
         async with aiohttp.ClientSession(auth=self._get_auth()) as session:
+            self.log.debug('registry host=%s, registry url=%s', self.host, url)
             url = self._get_registry_url()
             repo_names = await _get_repos(session, url)
 
