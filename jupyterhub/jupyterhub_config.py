@@ -5,6 +5,7 @@ import json
 import jsonschema
 from docker.types import (RestartPolicy, Placement)
 from coursewareuserspawner.traitlets import ResourceAllocation
+from cwh_repo2docker import cwh_repo2docker_jupyterhub_config
 
 # Configuration file for jupyterhub.
 
@@ -14,13 +15,14 @@ c.JupyterHub.hub_ip = '0.0.0.0'
 ## The public facing ip of the whole application (the proxy)
 c.JupyterHub.ip = '0.0.0.0'
 
-## The class to use for spawning single-user servers.
-#
-#  Should be a subclass of Spawner.
-c.JupyterHub.spawner_class = 'coursewareuserspawner.CoursewareUserSpawner'
+## Configure cwh_repo2docker spawner
+cwh_repo2docker_jupyterhub_config(c)
+
 c.DockerSpawner.container_ip = "0.0.0.0"
 c.DockerSpawner.container_image = os.environ['CONTAINER_IMAGE']
 c.DockerSpawner.network_name = os.environ['BACKEND_NETWORK']
+
+c.Registry.default_course_image = os.environ['CONTAINER_IMAGE']
 
 c.JupyterHub.authenticator_class = "jhub_remote_user_authenticator.remote_user_auth.RemoteUserLocalAuthenticator"
 c.LocalAuthenticator.create_system_users = True

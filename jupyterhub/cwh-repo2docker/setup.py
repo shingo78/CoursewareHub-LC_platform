@@ -34,18 +34,19 @@ class bdist_egg_disabled(bdist_egg):
         sys.exit("Aborting implicit building of eggs. Use `pip install .` to install from source.")
 
 setup_args = dict(
-    name                = 'coursewareuserspawner',
-    packages            = ['coursewareuserspawner'],
+    name                = 'cwh-repo2docker',
+    packages            = ['cwh_repo2docker'],
     version             = '0.1.0',
-    description         = """Coursewarespawner: A custom spawner for Jupyterhub.""",
-    long_description    = "Spawn single-user servers with Docker.",
-    platforms           = "Linux, Mac OS X",
-    install_requires    = ['requests-unixsocket', 'dockerspawner'],
+    platforms           = "Linux",
+    install_requires    = [
+        "coursewareuserspawner",
+        "jupyterhub~=3.1",
+        "aiodocker",
+        'aiohttp'],
     cmdclass = {
         'bdist_egg': bdist_egg if 'bdist_egg' in sys.argv else bdist_egg_disabled,
     }
 )
-
 
 
 def main():
