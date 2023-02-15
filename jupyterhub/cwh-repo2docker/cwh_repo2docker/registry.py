@@ -144,7 +144,7 @@ class Registry(LoggingConfigurable):
         return f'{scheme}://{self.host}/'
 
     def _get_auth(self):
-        return aiohttp.BasicAuth(self.user, self.password)
+        return aiohttp.BasicAuth(self.username, self.password)
 
     def get_default_course_image(self):
         host = self.host

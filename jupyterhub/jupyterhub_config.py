@@ -23,7 +23,7 @@ c.DockerSpawner.container_image = os.environ['CONTAINER_IMAGE']
 c.DockerSpawner.network_name = os.environ['BACKEND_NETWORK']
 
 c.Registry.default_course_image = os.environ['CONTAINER_IMAGE']
-c.Registry.host = os.environ.get('REGISTRY_HOST', 'registry')
+c.Registry.host = os.environ['REGISTRY_HOST']
 c.Registry.username = os.environ.get('REGISTRY_USER', 'cwh')
 c.Registry.password = os.environ['REGISTRY_PASSWORD']
 
