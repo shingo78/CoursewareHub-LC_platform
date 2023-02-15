@@ -23,6 +23,9 @@ c.DockerSpawner.container_image = os.environ['CONTAINER_IMAGE']
 c.DockerSpawner.network_name = os.environ['BACKEND_NETWORK']
 
 c.Registry.default_course_image = os.environ['CONTAINER_IMAGE']
+c.Registry.host = os.environ.get('REGISTRY_HOST', 'registry')
+c.Registry.username = os.environ.get('REGISTRY_USER', 'cwh')
+c.Registry.password = os.environ['REGISTRY_PASSWORD']
 
 c.JupyterHub.authenticator_class = "jhub_remote_user_authenticator.remote_user_auth.RemoteUserLocalAuthenticator"
 c.LocalAuthenticator.create_system_users = True
