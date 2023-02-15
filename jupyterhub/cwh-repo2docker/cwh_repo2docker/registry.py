@@ -139,6 +139,12 @@ class Registry(LoggingConfigurable):
         """
     )
 
+
+    def __init__(self, config=None):
+        super(Registry, self).__init__(config=config)
+
+        self.log.debug('Registry initialized, host=%s', self.host)
+
     def _get_registry_url(self):
         scheme = 'https' if not self.insecure else 'http'
         return f'{scheme}://{self.host}'
