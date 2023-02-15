@@ -18,8 +18,8 @@ c.JupyterHub.ip = '0.0.0.0'
 ## Configure cwh_repo2docker spawner
 cwh_repo2docker_jupyterhub_config(c)
 
-c.DockerSpawner.container_ip = "0.0.0.0"
-c.DockerSpawner.container_image = os.environ['CONTAINER_IMAGE']
+c.DockerSpawner.host_ip = "0.0.0.0"
+c.DockerSpawner.image = os.environ['CONTAINER_IMAGE']
 c.DockerSpawner.network_name = os.environ['BACKEND_NETWORK']
 
 c.Registry.default_course_image = os.environ['CONTAINER_IMAGE']
