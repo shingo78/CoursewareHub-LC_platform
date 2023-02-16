@@ -198,8 +198,8 @@ class Registry(SingletonConfigurable):
 
             tasks = []
             for manifest in manifests:
-                name = manifest['manifest']['name']
-                ref = manifest['manifest']['reference']
+                name = manifest['name']
+                ref = manifest['reference']
                 tasks.append(asyncio.ensure_future(
                     _get_config(session, url, name, ref, manifest)))
             configs = await asyncio.gather(*tasks)
