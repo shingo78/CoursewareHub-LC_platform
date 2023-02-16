@@ -6,18 +6,13 @@ from traitlets import (
     Unicode,
     Bool
 )
-from traitlets.config import LoggingConfigurable
+from traitlets.config import SingletonConfigurable
 
 CONTENT_TYPE_MANIFEST_V2_2 = 'application/vnd.docker.distribution.manifest.v2+json'
 
-_registry = None
-
 
 def get_registry():
-    global _registry
-    if _registry is None:
-        _registry = Registry()
-    return _registry
+    return Registry.instance()
 
 
 async def list_images():
@@ -84,7 +79,7 @@ async def _delete_blob(session, url, repo, digest):
         await resp.read()
 
 
-class Registry(LoggingConfigurable):
+class Registry(SingletonConfigurable):
     """
     Docker registry client to manage course images.
     """
@@ -143,7 +138,12 @@ class Registry(LoggingConfigurable):
     def __init__(self, config=None):
         super(Registry, self).__init__(config=config)
 
-        self.log.debug('Registry initialized, host=%s', self.host)
+        self.log.debug('Registry initialized')
+        self.log.debug('Registry host: %s', self.host)
+        self.log.debug('Registry user: %s', self.username)
+        self.log.debug(
+            'Registry default_course_image: %s',
+            self.default_course_image)
 
     def _get_registry_url(self):
         scheme = 'https' if not self.insecure else 'http'
