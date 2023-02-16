@@ -173,7 +173,7 @@ class Registry(SingletonConfigurable):
                 tasks.append(asyncio.ensure_future(
                     _get_tags(session, url, name)))
 
-            taginfos = await asyncio.gather(tasks)
+            taginfos = await asyncio.gather(*tasks)
             repos = []
             for taginfo in taginfos:
                 name = taginfo['name']
@@ -185,7 +185,7 @@ class Registry(SingletonConfigurable):
             for name, tag in repos:
                 tasks.append(asyncio.ensure_future(
                         _get_manifest(session, url, name, tag)))
-            manifests = await asyncio.gather(tasks)
+            manifests = await asyncio.gather(*tasks)
 
             tasks = []
             for manifest in manifests:
@@ -193,7 +193,7 @@ class Registry(SingletonConfigurable):
                 ref = manifest['manifest']['reference']
                 tasks.append(asyncio.ensure_future(
                     _get_config(session, url, name, ref, manifest)))
-            configs = await asyncio.gather(tasks)
+            configs = await asyncio.gather(*tasks)
 
             default_course_image = None
             for config in configs:
@@ -245,7 +245,7 @@ class Registry(SingletonConfigurable):
                 tasks.append(asyncio.ensure_future(
                     _delete_blob(session, url, name, layer['digest'])))
 
-            await asyncio.gather(tasks)
+            await asyncio.gather(*tasks)
 
     async def set_default_course_image(self, name, ref):
         return await self.set_name_tag(
