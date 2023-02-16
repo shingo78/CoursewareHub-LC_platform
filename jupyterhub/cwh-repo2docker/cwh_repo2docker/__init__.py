@@ -6,13 +6,9 @@ from jupyterhub.handlers.static import CacheControlStaticFilesHandler
 from traitlets import Unicode
 
 from .builder import BuildHandler
-from .registry import list_images, get_registry
+from .registry import get_registry
 from .images import ImagesHandler, DefaultCouseImageHandler
 from .logs import LogsHandler
-
-# Default CPU period
-# See: https://docs.docker.com/config/containers/resource_constraints/#limit-a-containers-access-to-memory#configure-the-default-cfs-scheduler
-CPU_PERIOD = 100_000
 
 
 class Repo2DockerSpawner(CoursewareUserSpawner):
@@ -76,14 +72,15 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
         """
         Override the default form to handle the case when there is only one image.
         """
+        registry = get_registry(parent=self)
+
         if not self.user.admin:
-            registry = get_registry()
             self.user_options = {
                 'image': registry.get_default_course_image()
             }
             return ''
 
-        images = await self.list_images()
+        images = await registry.list_images()
 
         image_form_template = Environment(loader=BaseLoader).from_string(
             self.image_form_template
