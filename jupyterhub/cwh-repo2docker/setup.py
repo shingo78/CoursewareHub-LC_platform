@@ -1,21 +1,13 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-import sys
-
-v = sys.version_info
-if v[:2] < (3,3):
-    error = "ERROR: Jupyter Hub requires Python version 3.3 or above."
-    print(error, file=sys.stderr)
-    sys.exit(1)
-
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup_args = dict(
     name                 = 'cwh-repo2docker',
-    packages             = ['cwh_repo2docker'],
     version              = '0.1.0',
     platforms            = "Linux",
+    packages             = find_packages(),
     include_package_data = True,
     install_requires     = [
         "coursewareuserspawner",
