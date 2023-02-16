@@ -165,7 +165,8 @@ class Registry(SingletonConfigurable):
         async with aiohttp.ClientSession(auth=self._get_auth()) as session:
             url = self._get_registry_url()
             self.log.debug('registry host=%s, registry url=%s', self.host, url)
-            repo_names = await _get_repos(session, url)['repositories']
+            repos_dict = await _get_repos(session, url)
+            repo_names = repos_dict['repositories']
 
             tasks = []
             for name in repo_names:
