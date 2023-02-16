@@ -4,7 +4,7 @@ from jupyterhub.scopes import needs_scope
 from tornado import web
 
 from .docker import list_containers
-from .registry import list_images, set_default_course_image
+from .registry import get_registry
 
 class ImagesHandler(BaseHandler):
     """
@@ -14,7 +14,7 @@ class ImagesHandler(BaseHandler):
     @web.authenticated
     @needs_scope('admin-ui')
     async def get(self):
-        images = await list_images()
+        images = await get_registry(parent=self).list_images()
         containers = await list_containers()
         result = self.render_template(
             "images.html",
@@ -37,6 +37,6 @@ class DefaultCouseImageHandler(BaseHandler):
         repo = self.get_body_argument('repo')
         ref = self.get_body_argument('ref')
 
-        set_default_course_image(repo, ref)
+        get_registry(parent=self).set_default_course_image(repo, ref)
         
 

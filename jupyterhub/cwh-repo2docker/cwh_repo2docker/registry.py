@@ -11,16 +11,8 @@ from traitlets.config import SingletonConfigurable
 CONTENT_TYPE_MANIFEST_V2_2 = 'application/vnd.docker.distribution.manifest.v2+json'
 
 
-def get_registry():
-    return Registry.instance()
-
-
-async def list_images():
-    return await get_registry().list_images()
-
-
-async def set_default_course_image(name, ref):
-    return await get_registry().set_default_course_image(name, ref)
+def get_registry(*args, **kwargs):
+    return Registry.instance(*args, **kwargs)
 
 
 async def _get_manifest(session, url, name, ref):
@@ -135,10 +127,9 @@ class Registry(SingletonConfigurable):
     )
 
 
-    def __init__(self, config=None):
-        super(Registry, self).__init__(config=config)
+    def __init__(self, *args, **kwargs):
+        super(Registry, self).__init__(*args, **kwargs)
 
-        self.log.debug('Registry initialized')
         self.log.debug('Registry host: %s', self.host)
         self.log.debug('Registry user: %s', self.username)
         self.log.debug(

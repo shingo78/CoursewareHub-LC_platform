@@ -61,7 +61,7 @@ class BuildHandler(APIHandler):
                     )
                 extra_buildargs.append(barg)
 
-        registry = get_registry()
+        registry = get_registry(parent=self)
 
         await build_image(registry.host, repo, ref, name, username, password, extra_buildargs)
 
