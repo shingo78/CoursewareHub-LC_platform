@@ -16,9 +16,12 @@ def get_registry(*args, **kwargs):
 
 
 async def _get_manifest(session, url, name, ref):
+    headers = {
+        'Accept': CONTENT_TYPE_MANIFEST_V2_2
+    }
     async with session.get(
-            f'{url}/v2/{name}/manifests/{ref}',
-            content_type=CONTENT_TYPE_MANIFEST_V2_2) as resp:
+            f'{url}/v2/{name}/manifests/{ref}', 
+            headers=headers) as resp:
         manifest = await resp.json()
         return {
             'name': name,
@@ -29,10 +32,13 @@ async def _get_manifest(session, url, name, ref):
 
 
 async def _put_manifest(session, url, name, ref, manifest):
+    headers = {
+        'Content-Type': CONTENT_TYPE_MANIFEST_V2_2
+    }
     async with session.put(
             f'{url}/v2/{name}/manifests/{ref}',
             json=manifest,
-            content_type=CONTENT_TYPE_MANIFEST_V2_2) as resp:
+            headers=headers) as resp:
         return await resp.json()
 
 
@@ -47,9 +53,12 @@ async def _get_repos(session, url):
 
 
 async def _get_blob(session, url, repo, digest, content_type):
+    headers = {
+        'Accept': content_type
+    }
     async with session.get(
             f'{url}/v2/{repo}/blobs/{digest}',
-            content_type=content_type) as resp:
+            headers=headers) as resp:
         return await resp.json()
 
 
