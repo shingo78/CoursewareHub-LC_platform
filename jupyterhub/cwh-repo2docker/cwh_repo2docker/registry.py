@@ -1,5 +1,6 @@
 import aiohttp
 import asyncio
+import json
 
 from textwrap import dedent
 from traitlets import (
@@ -52,21 +53,17 @@ async def _get_repos(session, url):
         return await resp.json()
 
 
-async def _get_blob(session, url, repo, digest, content_type):
-    headers = {
-        'Accept': content_type
-    }
+async def _get_blob(session, url, repo, digest):
     async with session.get(
-            f'{url}/v2/{repo}/blobs/{digest}',
-            headers=headers) as resp:
-        return await resp.json()
+            f'{url}/v2/{repo}/blobs/{digest}') as resp:
+        return await resp.read()
 
 
 async def _get_config(session, url, repo, ref, manifest):
     config_digest = manifest['manifest']['config']['digest']
-    config_media_type = manifest['manifest']['config']['mediaType']
-    config = await _get_blob(
-        session, url, repo, config_digest, config_media_type)
+    config_blob = await _get_blob(
+        session, url, repo, config_digest)
+    config = json.loads(config_blob)
     return {
         'name': repo,
         'reference': ref,
