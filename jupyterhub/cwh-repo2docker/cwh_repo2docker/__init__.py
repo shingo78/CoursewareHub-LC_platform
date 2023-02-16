@@ -62,12 +62,6 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
         """,
     )
 
-    async def list_images(self):
-        """
-        Return the list of available images
-        """
-        return await list_images()
-
     async def get_options_form(self):
         """
         Override the default form to handle the case when there is only one image.
@@ -86,10 +80,6 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
             self.image_form_template
         )
         return image_form_template.render(image_list=images)
-
-    async def start(self, *args, **kwargs):
-        await self.set_limits()
-        return await super().start(*args, **kwargs)
     
 
 
