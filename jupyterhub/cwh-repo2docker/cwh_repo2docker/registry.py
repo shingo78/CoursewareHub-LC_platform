@@ -43,7 +43,7 @@ async def _get_tags(session, url, repo):
 
 async def _get_repos(session, url):
     async with session.get(f'{url}/v2/_catalog') as resp:
-        return await resp.json()['repositories']
+        return await resp.json()
 
 
 async def _get_blob(session, url, repo, digest, content_type):
@@ -165,7 +165,7 @@ class Registry(SingletonConfigurable):
         async with aiohttp.ClientSession(auth=self._get_auth()) as session:
             url = self._get_registry_url()
             self.log.debug('registry host=%s, registry url=%s', self.host, url)
-            repo_names = await _get_repos(session, url)
+            repo_names = await _get_repos(session, url)['repositories']
 
             tasks = []
             for name in repo_names:
