@@ -74,7 +74,7 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
             self._use_default_course_image(images)
             return ''
 
-        if len(images) == 0:
+        if len(images) <= 1:
             self._use_initial_course_image(images)
             return ''
 
