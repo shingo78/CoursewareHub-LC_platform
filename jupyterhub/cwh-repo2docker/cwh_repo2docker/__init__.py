@@ -69,18 +69,25 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
         registry = get_registry(parent=self)
 
         if not self.user.admin:
-            self.user_options = {
-                'image': registry.get_default_course_image()
-            }
+            self._use_default_course_image()
             return ''
 
         images = await registry.list_images()
+
+        if len(images) == 0:
+            self._use_default_course_image()
+            return ''
 
         image_form_template = Environment(loader=BaseLoader).from_string(
             self.image_form_template
         )
         return image_form_template.render(image_list=images)
-    
+
+    def _use_default_course_image(self):
+        registry = get_registry(parent=self)
+        self.user_options = {
+            'image': registry.get_default_course_image()
+        }
 
 
 def cwh_repo2docker_jupyterhub_config(c):

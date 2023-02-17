@@ -21,14 +21,14 @@ async def _get_manifest(session, url, name, ref):
         'Accept': CONTENT_TYPE_MANIFEST_V2_2
     }
     async with session.get(
-            f'{url}/v2/{name}/manifests/{ref}', 
+            f'{url}/v2/{name}/manifests/{ref}',
             headers=headers) as resp:
         manifest = await resp.json()
         return {
             'name': name,
             'reference': ref,
             'digest': resp.headers['Docker-Content-Digest'],
-            'manifest': manifest
+            'data': manifest
         }
 
 
@@ -60,21 +60,34 @@ async def _get_blob(session, url, repo, digest):
 
 
 async def _get_config(session, url, repo, ref, manifest):
-    config_digest = manifest['manifest']['config']['digest']
+    config_digest = manifest['data']['config']['digest']
     config_blob = await _get_blob(
         session, url, repo, config_digest)
-    config = json.loads(config_blob)
+    config, digest = json.loads(config_blob)
     return {
         'name': repo,
         'reference': ref,
         'manifest': manifest,
-        'config': config
+        'data': config,
+        'digest': config_digest
     }
 
 
 async def _delete_blob(session, url, repo, digest):
     async with session.delete(f'{url}/v2/{repo}/blobs/{digest}') as resp:
         await resp.read()
+
+
+def _split_image_name(name, default_tag):
+    sep = name.rfind(':')
+    if sep < 0 or len(name) - 1 <= sep:
+        return (name, default_tag)
+    return (name[:sep], name[sep+1:])
+
+
+def short_id(id):
+    sep = id.split(':')
+    return id[sep+1:sep+13]
 
 
 class Registry(SingletonConfigurable):
@@ -132,15 +145,23 @@ class Registry(SingletonConfigurable):
         """
     )
 
+    initial_course_image = Unicode(
+        'coursewarehub/default-course-image:latest',
+        config=True,
+        help="""
+        Name of initial course image, excluding registry host name
+        """
+    )
 
     def __init__(self, *args, **kwargs):
         super(Registry, self).__init__(*args, **kwargs)
 
         self.log.debug('Registry host: %s', self.host)
         self.log.debug('Registry user: %s', self.username)
-        self.log.debug(
-            'Registry default_course_image: %s',
-            self.default_course_image)
+        self.log.debug('default_course_image: %s',
+                       self.default_course_image)
+        self.log.debug('initial_course_image: %s',
+                       self.initial_course_image)
 
     def _get_registry_url(self):
         scheme = 'https' if not self.insecure else 'http'
@@ -202,15 +223,27 @@ class Registry(SingletonConfigurable):
             configs = await asyncio.gather(*tasks)
 
             default_course_image = None
+            initial_course_image = None
             for config in configs:
-                labels = config.get('config', {}).get('Labels', {})
+                labels = config.get('data', {}).get('Labels', {})
                 if 'cwh_repo2docker.image_name' not in labels:
                     continue
                 name = config['name']
                 ref = config['reference']
                 image_name = f'{name}:{ref}'
-                if (name == self.default_course_image == image_name):
-                    default_course_image = (name, ref)
+                if self.default_course_image == image_name:
+                    default_course_image = config['digest']
+                elif self.initial_course_image == image_name:
+                    initial_course_image = {
+                        "repo": '-',
+                        "ref": '-',
+                        "image_name": name,
+                        "display_name": 'initial',
+                        "default_course_image": False,
+                        "image_id": config['digest'],
+                        "short_image_id": short_id(config['digest']),
+                        "status": "-"
+                    }
                 elif (name == labels["repo2docker.repo"] and
                         ref == labels["repo2docker.ref"]):
                     images.append({
@@ -219,14 +252,18 @@ class Registry(SingletonConfigurable):
                         "image_name": labels["cwh_repo2docker.image_name"],
                         "display_name": labels["cwh_repo2docker.display_name"],
                         "default_course_image": False,
+                        "image_id": config['digest'],
+                        "short_image_id": short_id(config['digest']),
                         "status": "built"
                     })
 
             if default_course_image:
                 for image in images:
-                    if (image['repo'] == default_course_image[0] and
-                            image['ref'] == default_course_image[1]):
+                    if image['image_id'] == default_course_image:
                         image['default_course_image'] = True
+
+            if initial_course_image:
+                images.append(initial_course_image)
 
             return images
 
@@ -254,10 +291,9 @@ class Registry(SingletonConfigurable):
             await asyncio.gather(*tasks)
 
     async def set_default_course_image(self, name, ref):
+        new_name, new_ref = _split_image_name(self.default_course_image)
         return await self.set_name_tag(
-            self.get_default_course_image_name(),
-            self.get_default_course_image_tag(),
-            name, ref)
+            new_name, new_ref, name, ref)
 
     async def set_name_tag(self, new_name, new_tag, src_name, src_tag):
         async with aiohttp.ClientSession(auth=self._get_auth()) as session:

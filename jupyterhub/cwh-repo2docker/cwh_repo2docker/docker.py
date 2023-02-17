@@ -42,7 +42,8 @@ async def build_image(
     # and sanitize the name of the docker image
     name = name or urlparse(repo).path.strip("/")
     name = name.lower().replace("/", "-")
-    image_name = f"{registry_host}/{name}:{ref}"
+    image_name = f"{name}:{ref}"
+    image_registry_name = f"{registry_host}/{name}:{ref}"
 
     # add extra labels to set additional image properties
     labels = [
@@ -60,7 +61,7 @@ async def build_image(
         "--no-run",
         "--push",
         "--image-name",
-        image_name,
+        image_registry_name,
     ]
 
     for label in labels:

@@ -16,13 +16,17 @@
         <th>Repository URL</th>
         <th>Reference</th>
         <th>Status</th>
+        <th>Image ID</th>
         <th>Default Course Image</th>
         <th class="text-center"><a id="add-environment" role="button" class="btn btn-primary btn-xs">Add New</a></th>
       </tr>
     </thead>
     <tbody>
+      {% if images | length == 0 %}
+      No available course images
+      {%- endif %}
       {% for image in images %}
-      <tr class="image-row" data-image="{{ image.image_name }}" data-display-name="{{ image.display_name }}" data-image-repo="{{ image.repo }}" data-image-ref="{{ image.ref }}>
+      <tr class="image-row" data-image="{{ image.image_name }}" data-display-name="{{ image.display_name }}" data-image-repo="{{ image.repo }}" data-image-ref="{{ image.ref }}" data-image-id="{{ image.image_id }}">
         <td class="repo-col col-sm-3">
           {{ image.display_name }}
         </td>
@@ -39,6 +43,9 @@
           {%- elif image.status == 'built' %}
             <i title="Built" class="fa fa-check-square fa-lg fa-fw" style="color: green;"></i>
           {%- endif %}
+        </td>
+        <td class="image-id-col col-sm-1">
+          {{ image.short_image_id }}
         </td>
         <td class="default-col col-sm-1">
           {% if image.status == 'built'%}

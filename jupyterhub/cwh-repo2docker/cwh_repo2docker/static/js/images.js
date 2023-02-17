@@ -45,8 +45,8 @@ require([
   $(".set-default-course-image").click(function() {
     var el = $(this);
     var row = getRow(el);
-    var repo = row.data('repo');
-    var ref = row.data('ref');
+    var repo = row.data('image');
+    var ref = row.data('image-id');
     api.api_request("environments/default-course-image", {
       type: "POST",
       data: JSON.stringify({
