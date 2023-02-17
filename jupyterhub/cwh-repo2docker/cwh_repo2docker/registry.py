@@ -63,7 +63,7 @@ async def _get_config(session, url, repo, ref, manifest):
     config_digest = manifest['data']['config']['digest']
     config_blob = await _get_blob(
         session, url, repo, config_digest)
-    config, digest = json.loads(config_blob)
+    config = json.loads(config_blob)
     return {
         'name': repo,
         'reference': ref,
