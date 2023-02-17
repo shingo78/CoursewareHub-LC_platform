@@ -175,17 +175,10 @@ class Registry(SingletonConfigurable):
         name = self.default_course_image
         return f'{host}/{name}'
 
-    def get_default_course_image_name(self):
-        sep = self.default_course_image.rfind(':')
-        if sep < 0:
-            return self.default_course_image
-        return self.default_course_image[:sep]
-
-    def get_default_course_image_tag(self):
-        sep = self.default_course_image.rfind(':')
-        if sep < 0 or len(self.default_course_image) - 1 <= sep:
-            return 'latest'
-        return self.default_course_image[sep+1:]
+    def get_initial_course_image(self):
+        host = self.host
+        name = self.initial_course_image
+        return f'{host}/{name}'
 
     async def list_images(self):
         images = []
@@ -221,6 +214,8 @@ class Registry(SingletonConfigurable):
                 tasks.append(asyncio.ensure_future(
                     _get_config(session, url, name, ref, manifest)))
             configs = await asyncio.gather(*tasks)
+
+            self.log.debug('found images: %s', [f"{c['name']:c['reference']}" for c in configs])
 
             default_course_image = None
             initial_course_image = None
