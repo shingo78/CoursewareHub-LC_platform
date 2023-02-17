@@ -215,7 +215,7 @@ class Registry(SingletonConfigurable):
                     _get_config(session, url, name, ref, manifest)))
             configs = await asyncio.gather(*tasks)
 
-            self.log.debug('found images: %s', [f"{c['name']:c['reference']}" for c in configs])
+            self.log.debug('found images: %s', [f"{c['name']}:{c['reference']}" for c in configs])
 
             default_course_image = None
             initial_course_image = None
