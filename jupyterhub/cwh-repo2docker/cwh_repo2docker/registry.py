@@ -146,7 +146,7 @@ class Registry(SingletonConfigurable):
     )
 
     initial_course_image = Unicode(
-        'coursewarehub/default-course-image:latest',
+        'coursewarehub/initial-course-image:latest',
         config=True,
         help="""
         Name of initial course image, excluding registry host name
