@@ -75,7 +75,7 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
             return ''
 
         if len(images) == 0:
-            self._use_initial_course_image()
+            self._use_initial_course_image(images)
             return ''
 
         image_form_template = Environment(loader=BaseLoader).from_string(
