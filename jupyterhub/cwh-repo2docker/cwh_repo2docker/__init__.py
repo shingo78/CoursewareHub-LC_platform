@@ -99,9 +99,6 @@ def cwh_repo2docker_jupyterhub_config(c):
         0, os.path.join(os.path.dirname(__file__), "templates")
     )
 
-    # spawner
-    c.DockerSpawner.pull_policy = "always"
-
     # register the handlers to manage the user images
     c.JupyterHub.extra_handlers.extend(
         [
