@@ -225,19 +225,21 @@ class Registry(SingletonConfigurable):
                     continue
                 name = config['name']
                 ref = config['reference']
-                image_name = f'{name}:{ref}'
-                if self.default_course_image == image_name:
+                image_name_ref = f'{name}:{ref}'
+                if self.default_course_image == image_name_ref:
                     default_course_image = config['digest']
-                elif self.initial_course_image == image_name:
+                elif self.initial_course_image == image_name_ref:
                     initial_course_image = {
                         "repo": '-',
                         "ref": '-',
                         "image_name": name,
                         "display_name": 'initial',
-                        "default_course_image": False,
                         "image_id": config['digest'],
                         "short_image_id": short_id(config['digest']),
-                        "status": "-"
+                        "cmd": config['data']['Cmd'],
+                        "status": "-",
+                        "default_course_image": False,
+                        "initial_course_image": True,
                     }
                 elif (name == labels["repo2docker.repo"] and
                         ref == labels["repo2docker.ref"]):
@@ -246,10 +248,12 @@ class Registry(SingletonConfigurable):
                         "ref": labels["repo2docker.ref"],
                         "image_name": labels["cwh_repo2docker.image_name"],
                         "display_name": labels["cwh_repo2docker.display_name"],
-                        "default_course_image": False,
                         "image_id": config['digest'],
                         "short_image_id": short_id(config['digest']),
-                        "status": "built"
+                        "cmd": config['data']['Cmd'],
+                        "status": "built",
+                        "default_course_image": False,
+                        "initial_course_image": False,
                     })
 
             if default_course_image:

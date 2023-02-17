@@ -32,6 +32,7 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
         <label for='image-item-{{ loop.index0 }}' class='form-control input-group'>
             <div class='col-md-1'>
                 <input type='radio' name='image' id='image-item-{{ loop.index0 }}' value='{{ image.image_name }}' />
+                <input type='hidden' name='cmd' id='image-item-{{ loop.index0 }}' value='{{ image.cmd }}' />
             </div>
             <div class='col-md-11'>
                 <strong>{{ image.display_name }}</strong>
@@ -67,12 +68,11 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
         Override the default form to handle the case when there is only one image.
         """
         registry = get_registry(parent=self)
+        images = await registry.list_images()
 
         if not self.user.admin:
-            self._use_default_course_image()
+            self._use_default_course_image(images)
             return ''
-
-        images = await registry.list_images()
 
         if len(images) == 0:
             self._use_initial_course_image()
@@ -83,13 +83,46 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
         )
         return image_form_template.render(image_list=images)
 
-    def _use_default_course_image(self):
+    def _use_default_course_image(self, images):
         registry = get_registry(parent=self)
+
         self.image = registry.get_default_course_image()
 
-    def _use_initial_course_image(self):
+        default_course_images = [i for i in images if i['default_course_image']]
+        if not default_course_images:
+            self._use_initial_course_image(images)
+            return
+        self.cmd = default_course_images[0]['cmd']
+
+    def _use_initial_course_image(self, images):
         registry = get_registry(parent=self)
+
         self.image = registry.get_initial_course_image()
+
+        initial_course_images = [i for i in images if i['initial_course_image']]
+        if not initial_course_images:
+            raise RuntimeError("Initial course image NOT found")
+        self.cmd = initial_course_images[0]['cmd']
+
+    def options_from_form(self, formdata):
+        """Turn options formdata into user_options"""
+        options = {}
+        if 'image' in formdata:
+            options['image'] = formdata['image'][0]
+        if 'cmd' in formdata:
+            options['cmd'] = formdata['cmd'][0]
+        return options
+
+    async def get_command(self):
+        """get command from registry instead of local image."""
+
+        if 'cmd' in self.user_options:
+            cmd = self.user_options['cmd']
+        elif self.cmd:
+            cmd = self.cmd
+        else:
+            raise RuntimeError('Could not get command from image')
+        return cmd + self.get_args()
 
 
 def cwh_repo2docker_jupyterhub_config(c):
