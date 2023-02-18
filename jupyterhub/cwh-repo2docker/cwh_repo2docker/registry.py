@@ -85,8 +85,8 @@ def _split_image_name(name, default_tag):
     return (name[:sep], name[sep+1:])
 
 
-def short_id(id):
-    sep = id.split(':')
+def _short_id(id):
+    sep = id.find(':')
     return id[sep+1:sep+13]
 
 
@@ -235,7 +235,7 @@ class Registry(SingletonConfigurable):
                         "image_name": name,
                         "display_name": 'initial',
                         "image_id": config['digest'],
-                        "short_image_id": short_id(config['digest']),
+                        "short_image_id": _short_id(config['digest']),
                         "cmd": config['data']['Cmd'],
                         "status": "-",
                         "default_course_image": False,
@@ -251,7 +251,7 @@ class Registry(SingletonConfigurable):
                         "image_name": labels["cwh_repo2docker.image_name"],
                         "display_name": labels["cwh_repo2docker.display_name"],
                         "image_id": config['digest'],
-                        "short_image_id": short_id(config['digest']),
+                        "short_image_id": _short_id(config['digest']),
                         "cmd": config['data']['Cmd'],
                         "status": "built",
                         "default_course_image": False,
