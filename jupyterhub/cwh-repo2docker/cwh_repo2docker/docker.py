@@ -43,7 +43,8 @@ async def build_image(
     name = name or urlparse(repo).path.strip("/")
     name = name.lower().replace("/", "-")
     image_name = f"{name}:{ref}"
-    image_registry_name = f"{registry_host}/{name}:{ref}"
+    image_name = image_name.lower().replace("/", "-")
+    image_registry_name = f"{registry_host}/{image_name}"
 
     # add extra labels to set additional image properties
     labels = [
