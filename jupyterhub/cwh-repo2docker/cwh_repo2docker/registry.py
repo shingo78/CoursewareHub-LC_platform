@@ -21,7 +21,7 @@ async def _get_manifest(session, url, name, ref):
         'Accept': CONTENT_TYPE_MANIFEST_V2_2
     }
     async with session.get(
-            f'{url}/v2/{name}/manifests/{ref}',
+            f'{url}{name}/manifests/{ref}',
             headers=headers) as resp:
         manifest = await resp.json()
         return {
@@ -37,25 +37,25 @@ async def _put_manifest(session, url, name, ref, manifest):
         'Content-Type': CONTENT_TYPE_MANIFEST_V2_2
     }
     async with session.put(
-            f'{url}/v2/{name}/manifests/{ref}',
+            f'{url}{name}/manifests/{ref}',
             json=manifest,
             headers=headers) as resp:
         return await resp.json()
 
 
 async def _get_tags(session, url, repo):
-    async with session.get(f'{url}/v2/{repo}/tags/list') as resp:
+    async with session.get(f'{url}{repo}/tags/list') as resp:
         return await resp.json()
 
 
 async def _get_repos(session, url):
-    async with session.get(f'{url}/v2/_catalog') as resp:
+    async with session.get(f'{url}_catalog') as resp:
         return await resp.json()
 
 
 async def _get_blob(session, url, repo, digest):
     async with session.get(
-            f'{url}/v2/{repo}/blobs/{digest}') as resp:
+            f'{url}{repo}/blobs/{digest}') as resp:
         return await resp.read()
 
 
@@ -74,7 +74,7 @@ async def _get_config(session, url, repo, ref, manifest):
 
 
 async def _delete_blob(session, url, repo, digest):
-    async with session.delete(f'{url}/v2/{repo}/blobs/{digest}') as resp:
+    async with session.delete(f'{url}{repo}/blobs/{digest}') as resp:
         await resp.read()
 
 
@@ -163,9 +163,9 @@ class Registry(SingletonConfigurable):
         self.log.debug('initial_course_image: %s',
                        self.initial_course_image)
 
-    def _get_registry_url(self):
+    def get_registry_url(self):
         scheme = 'https' if not self.insecure else 'http'
-        return f'{scheme}://{self.host}'
+        return f'{scheme}://{self.host}/v2/'
 
     def _get_auth(self):
         return aiohttp.BasicAuth(self.username, self.password)
@@ -182,7 +182,7 @@ class Registry(SingletonConfigurable):
 
     async def list_images(self):
         async with aiohttp.ClientSession(auth=self._get_auth()) as session:
-            url = self._get_registry_url()
+            url = self.get_registry_url()
             self.log.debug('registry host=%s, registry url=%s', self.host, url)
             repos_dict = await _get_repos(session, url)
             repo_names = repos_dict['repositories']
@@ -273,13 +273,13 @@ class Registry(SingletonConfigurable):
 
     async def delete(self, name, ref):
         async with aiohttp.ClientSession(auth=self._get_auth()) as session:
-            url = self._get_registry_url()
+            url = self.get_registry_url()
 
             manifest = await _get_manifest(session, url, name, ref)
             manifest_digest = manifest['digest']
 
             async with session.delete(
-                    f'{url}/v2/{name}/manifests/{manifest_digest}') as resp:
+                    f'{url}{name}/manifests/{manifest_digest}') as resp:
                 await resp.json()
 
             tasks = []
@@ -301,7 +301,7 @@ class Registry(SingletonConfigurable):
 
     async def set_name_tag(self, new_name, new_tag, src_name, src_tag):
         async with aiohttp.ClientSession(auth=self._get_auth()) as session:
-            url = self._get_registry_url()
+            url = self.get_registry_url()
 
             manifest = await _get_manifest(session, url, src_name, src_tag)
 

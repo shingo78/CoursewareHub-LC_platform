@@ -124,6 +124,16 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
             raise RuntimeError('Could not get command from image')
         return cmd + self.get_args()
 
+    async def create_object(self, *args, **kwargs):
+        registry = get_registry()
+        self.docker(
+            'login',
+            username=registry.username,
+            password=registry.password,
+            registry=registry.get_registry_url())
+        return await super().create_object(*args, **kwargs)
+
+
 
 def cwh_repo2docker_jupyterhub_config(c):
     # hub
