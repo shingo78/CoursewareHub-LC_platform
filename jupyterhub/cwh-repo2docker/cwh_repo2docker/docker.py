@@ -89,13 +89,14 @@ async def build_image(
             "cwh_repo2docker.display_name": name,
         },
         "Volumes": {
-            "/var/run/docker.sock": {
-                "bind": "/var/run/docker.sock",
-                "mode": "rw",
-            }
+            "/var/run/docker.sock": {},
+            "/root/.docker/config.json": {}
         },
         "HostConfig": {
-            "Binds": ["/var/run/docker.sock:/var/run/docker.sock"],
+            "Binds": [
+                "/var/run/docker.sock:/var/run/docker.sock",
+                "/root/.docker/config.json:/root/.docker/config.json:ro"
+            ]
         },
         "Tty": False,
         "AttachStdout": False,
