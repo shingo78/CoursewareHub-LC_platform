@@ -6,7 +6,7 @@ from jupyterhub.handlers.static import CacheControlStaticFilesHandler
 from traitlets import Unicode
 
 from .builder import BuildHandler
-from .registry import get_registry
+from .registry import get_registry, split_image_name
 from .images import ImagesHandler, DefaultCouseImageHandler
 from .logs import LogsHandler
 
@@ -32,7 +32,6 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
         <label for='image-item-{{ loop.index0 }}' class='form-control input-group'>
             <div class='col-md-1'>
                 <input type='radio' name='image' id='image-item-{{ loop.index0 }}' value='{{ image.image_name }}' />
-                <input type='hidden' name='cmd' id='image-item-{{ loop.index0 }}' value='{{ image.cmd }}' />
             </div>
             <div class='col-md-11'>
                 <strong>{{ image.display_name }}</strong>
@@ -104,28 +103,30 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
             raise RuntimeError("Initial course image NOT found")
         self.cmd = initial_course_images[0]['cmd']
 
-    def options_from_form(self, formdata):
-        """Turn options formdata into user_options"""
-        options = {}
-        if 'image' in formdata:
-            options['image'] = formdata['image'][0]
-        if 'cmd' in formdata:
-            options['cmd'] = formdata['cmd'][0]
-        return options
-
     async def get_command(self):
         """get command from registry instead of local image."""
 
-        if 'cmd' in self.user_options:
-            cmd = self.user_options['cmd']
-        elif self.cmd:
+        if self.cmd:
             cmd = self.cmd
         else:
-            raise RuntimeError('Could not get command from image')
+            parts = self.image.split('/', 1)
+            if len(parts) == 2:
+                host, image_name = parts
+            else:
+                host, image_name = ('', parts[0])
+
+            registry = get_registry(parent=self)
+            if host == registry.host:
+                name, ref = split_image_name(image_name)
+                config = await registry.inspect_image(name, ref)
+                cmd = config['data']['config']['Cmd']
+            else:
+                image_info = await self.docker("inspect_image", self.image)
+                cmd = image_info["Config"]["Cmd"]
         return cmd + self.get_args()
 
     async def create_object(self, *args, **kwargs):
-        registry = get_registry()
+        registry = get_registry(parent=self)
         self.docker(
             'login',
             username=registry.username,

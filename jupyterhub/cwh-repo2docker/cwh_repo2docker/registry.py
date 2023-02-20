@@ -78,11 +78,13 @@ async def _delete_blob(session, url, repo, digest):
         await resp.read()
 
 
-def _split_image_name(name, default_tag):
-    sep = name.rfind(':')
-    if sep < 0 or len(name) - 1 <= sep:
-        return (name, default_tag)
-    return (name[:sep], name[sep+1:])
+def split_image_name(image_name, default_tag='latest'):
+    parts = image_name.rsplit(':', 1)
+    if len(parts) == 2:
+        name, tag = parts
+    else:
+        name, tag = (parts[0], default_tag)
+    return (name, tag)
 
 
 def _short_id(id):
@@ -236,7 +238,6 @@ class Registry(SingletonConfigurable):
                         "display_name": 'initial',
                         "image_id": config['digest'],
                         "short_image_id": _short_id(config['digest']),
-                        "cmd": config['data']['config']['Cmd'],
                         "status": "-",
                         "default_course_image": False,
                         "initial_course_image": True,
@@ -251,7 +252,6 @@ class Registry(SingletonConfigurable):
                         "display_name": labels["cwh_repo2docker.display_name"],
                         "image_id": config['digest'],
                         "short_image_id": _short_id(config['digest']),
-                        "cmd": config['data']['config']['Cmd'],
                         "status": "built",
                         "default_course_image": False,
                         "initial_course_image": False,
@@ -269,6 +269,14 @@ class Registry(SingletonConfigurable):
                 images.append(initial_course_image)
 
             return images
+
+    async def inspect_image(self, name, ref):
+        async with aiohttp.ClientSession(auth=self._get_auth()) as session:
+            url = self.get_registry_url()
+
+            manifest = await _get_manifest(session, url, name, ref)
+
+            return await _get_config(session, url, name, ref, manifest)
 
     async def delete(self, name, ref):
         async with aiohttp.ClientSession(auth=self._get_auth()) as session:
@@ -294,7 +302,7 @@ class Registry(SingletonConfigurable):
             await asyncio.gather(*tasks)
 
     async def set_default_course_image(self, name, ref):
-        new_name, new_ref = _split_image_name(self.default_course_image)
+        new_name, new_ref = split_image_name(self.default_course_image)
         return await self.set_name_tag(
             new_name, new_ref, name, ref)
 
