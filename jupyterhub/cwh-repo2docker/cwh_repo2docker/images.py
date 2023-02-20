@@ -14,7 +14,8 @@ class ImagesHandler(BaseHandler):
     @web.authenticated
     @needs_scope('admin-ui')
     async def get(self):
-        images = await get_registry(parent=self).list_images()
+        registry = get_registry(parent=self)
+        images = await registry.list_images()
         containers = await list_containers()
         result = self.render_template(
             "images.html",
