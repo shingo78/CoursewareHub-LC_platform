@@ -234,7 +234,7 @@ class Registry(SingletonConfigurable):
                     initial_course_image = {
                         "repo": '-',
                         "ref": '-',
-                        "image_name": name,
+                        "image_name": image_name_ref,
                         "display_name": 'initial',
                         "image_id": config['digest'],
                         "short_image_id": _short_id(config['digest']),
