@@ -106,6 +106,8 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
     async def get_command(self):
         """get command from registry instead of local image."""
 
+        self.log.debug("get_command: image=%s", self.image)
+
         if self.cmd:
             cmd = self.cmd
         else:
@@ -123,6 +125,9 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
             else:
                 image_info = await self.docker("inspect_image", self.image)
                 cmd = image_info["Config"]["Cmd"]
+
+        self.log.debug("get_command: %s", str(cmd))
+
         return cmd + self.get_args()
 
     async def create_object(self, *args, **kwargs):
