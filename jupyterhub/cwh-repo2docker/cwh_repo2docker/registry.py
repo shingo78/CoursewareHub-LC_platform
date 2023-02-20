@@ -220,7 +220,7 @@ class Registry(SingletonConfigurable):
             initial_course_image = None
             images = []
             for config in configs:
-                labels = config.get('data', {}).get('Labels', {})
+                labels = config['data'].get('config', {}).get('Labels', {})
                 name = config['name']
                 ref = config['reference']
                 image_name_ref = f'{name}:{ref}'
@@ -242,8 +242,7 @@ class Registry(SingletonConfigurable):
                         "initial_course_image": True,
                     }
                 elif ('cwh_repo2docker.image_name' in labels and
-                        name == labels["repo2docker.repo"] and
-                        ref == labels["repo2docker.ref"]):
+                        image_name_ref == labels['cwh_repo2docker.image_name']):
                     self.log.debug('found repo2docker course image: %s labels=%s', image_name_ref, labels)
                     images.append({
                         "repo": labels["repo2docker.repo"],
