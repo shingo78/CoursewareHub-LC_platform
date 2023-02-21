@@ -68,7 +68,7 @@ function redirect_to_hub()
         http_response_code($info["http_code"]);
         error_log('All Response Header: ' . $res_header);
         $res_headers = array_slice(explode(PHP_EOL, $res_header), 1);
-        foreach($h as $res_headers) {
+        foreach ($res_headers as $h) {
             error_log('Response Header: ' . $h);
             $key_value = explode(':', $h, 2);
             if (count($key_value) != 2) {
