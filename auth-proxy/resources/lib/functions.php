@@ -20,13 +20,12 @@ function redirect_to_hub()
         error_log('post body:' . $post_body);
 
         $ch = curl_init($reproxy_url);
-        if ($_SERVER_['HTTPS']) {
+        if ($_SERVER['HTTPS']) {
             $proto = 'https';
         } else {
             $proto = 'http';
         }
         $headers = array (
-            'REMOTE_USER: ', $_SERVER['HTTP_X_REMOTE_USER'],
             'X-Real-IP: ', $_SERVER['REMOTE_ADDR'],
             'Host: ', $_SERVER['HTTP_HOST'],
             'User-Agent' . $_SERVER['HTTP_USER_AGENT'],
