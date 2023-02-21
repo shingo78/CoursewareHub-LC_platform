@@ -42,7 +42,7 @@ function redirect_to_hub()
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         if ($_SERVER['CONTENT_TYPE'] == 'application/x-www-form-urlencoded') {
             curl_setopt($ch, CURLOPT_POSTFIELDS, $_POST);
-        } elseif (str_starts_with($_SERVER['CONTENT_TYPE'], 'multipart/form-data') {
+        } elseif (str_starts_with($_SERVER['CONTENT_TYPE'], 'multipart/form-data')) {
             curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($_POST));
         }
         curl_exec($ch);
