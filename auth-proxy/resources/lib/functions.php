@@ -17,7 +17,7 @@ function redirect_to_hub()
         header("X-Reproxy-URL: ".$reproxy_url);
     } elseif ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $post_body = file_get_contents('php://input');
-        error_log('post body:' . $post_body)
+        error_log('post body:' . $post_body);
 
         $ch = curl_init($reproxy_url);
         if ($_SERVER_['HTTPS']) {
