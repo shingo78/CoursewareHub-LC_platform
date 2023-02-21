@@ -12,8 +12,45 @@ function redirect_to_hub()
     if (array_key_exists('HTTP_X_REPROXY_QUERY', $_SERVER)) {
         $reproxy_url = $reproxy_url.$_SERVER['HTTP_X_REPROXY_QUERY'];
     }
-    header("X-Accel-Redirect: /entrance/");
-    header("X-Reproxy-URL: ".$reproxy_url);
+    if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+        header("X-Accel-Redirect: /entrance/");
+        header("X-Reproxy-URL: ".$reproxy_url);
+    } elseif ($_SERVER['REQUEST_METHOD'] == 'POST') {
+        $post_body = file_get_contents('php://input');
+
+        $ch = curl_init();
+        if ($_SERVER_['HTTPS']) {
+            $proto = 'https';
+        } else {
+            $proto = 'http';
+        }
+        $headers = array (
+            'REMOTE_USER: ', $_SERVER['HTTP_X_REMOTE_USER'],
+            'X-Real-IP: ', $_SERVER['REMOTE_ADDR'],
+            'Host: ', $_SERVER['HTTP_HOST'],
+            'User-Agent' . $_SERVER['HTTP_USER_AGENT'],
+            'Referer' . $_SERVER['HTTP_REFERER'],
+            'Origin' . $_SERVER['HTTP_ORIGIN'],
+            'Cookie: ' . $_SERVER['HTTP_COOKIE'],
+            'X-Forwarded-For: ', $_SERVER['HTTP_X_FORWARDED_FOR'],
+            'X-Forwarded-Proto: ', $proto,
+            'X-Scheme: ' . $proto,
+            'Accept: ' . $_SERVER['HTTP_ACCEPT'],
+            'Accept-Encoding: ' . $_SERVER['HTTP_ACCEPT_ENCODING'],
+            'Accept-Language: ' . $_SERVER['HTTP_ACCEPT_LANGUAGE'],
+            'Content-Type: ' . $_SERVER['CONTENT_TYPE']
+        );
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+        curl_setopt($ch, CURLOPT_URL, $requestUri);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($curl, CURLOPT_POSTFIELDS, $post_body);
+        curl_exec($ch);
+        curl_close($ch);
+    } else {
+        http_response_code(405);
+    }
 }
 
 /**
