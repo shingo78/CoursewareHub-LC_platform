@@ -5,6 +5,17 @@ require_once __DIR__ . '/../simplesamlphp/www/_include.php';
 
 $SESSION_NAME = session_name();
 
+$HOP_BY_HOP_HEADERS = array_map('strtolower', [
+    "Connection",
+    "Keep-Alive",
+    "Proxy-Authenticate",
+    "Proxy-Authorization",
+    "TE",
+    "Trailers",
+    "Transfer-Encoding",
+    "Upgrade"
+]);
+
 
 function redirect_to_hub()
 {
@@ -46,7 +57,25 @@ function redirect_to_hub()
         } elseif (str_starts_with($_SERVER['CONTENT_TYPE'], 'multipart/form-data')) {
             curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($_POST));
         }
-        curl_exec($ch);
+        $result = curl_exec($ch);
+
+        $info = curl_getinfo($ch);
+        $res_header = substr($result, 0, $info["header_size"]);
+        $res_body = substr($result, $info["header_size"]);
+
+        http_response_code($info["http_code"]);
+        $res_headers = array_slice(explode(PHP_EOL, $res_header), 1);
+        foreach($h as $res_headers) {
+            $key_value = explode(':', $h, 2);
+            if (count($key_value) != 2) {
+                continue;
+            }
+            if (! $in_array(strtolower($key_value[0]), $HOP_BY_HOP_HEADERS, true)) {
+                header($h);
+            }
+        }
+        http_response_code($info["http_code"]);
+        echo $res_body;
         curl_close($ch);
     } else {
         http_response_code(405);
