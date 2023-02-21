@@ -19,6 +19,8 @@ $HOP_BY_HOP_HEADERS = array_map('strtolower', [
 
 function redirect_to_hub()
 {
+    global $HOP_BY_HOP_HEADERS;
+
     $reproxy_url = HUB_URL.implode('/', array_map('rawurlencode', explode('/', $_SERVER['HTTP_X_REPROXY_URI'])));
     if (array_key_exists('HTTP_X_REPROXY_QUERY', $_SERVER)) {
         $reproxy_url = $reproxy_url.$_SERVER['HTTP_X_REPROXY_QUERY'];
