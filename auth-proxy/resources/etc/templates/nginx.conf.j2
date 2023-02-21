@@ -60,6 +60,8 @@ http {
         add_header X-Content-Type-Options nosniff;
         resolver_timeout 5s;
 
+        resolver 127.0.0.11;
+
         location ^~ /login {
             rewrite /login /php/login.php permanent;
         }
