@@ -70,7 +70,7 @@ function redirect_to_hub()
             if (count($key_value) != 2) {
                 continue;
             }
-            if (! $in_array(strtolower($key_value[0]), $HOP_BY_HOP_HEADERS, true)) {
+            if (!in_array(strtolower($key_value[0]), $HOP_BY_HOP_HEADERS, true)) {
                 header($h);
             }
         }
