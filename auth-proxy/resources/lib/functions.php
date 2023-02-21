@@ -38,7 +38,7 @@ function redirect_to_hub()
         );
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         if ($_SERVER['CONTENT_TYPE'] == 'application/x-www-form-urlencoded') {
             curl_setopt($ch, CURLOPT_POSTFIELDS, $_POST);
