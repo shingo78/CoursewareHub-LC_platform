@@ -18,7 +18,7 @@ function redirect_to_hub()
     } elseif ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $post_body = file_get_contents('php://input');
 
-        $ch = curl_init();
+        $ch = curl_init($reproxy_url);
         if ($_SERVER_['HTTPS']) {
             $proto = 'https';
         } else {
@@ -41,7 +41,6 @@ function redirect_to_hub()
             'Content-Type: ' . $_SERVER['CONTENT_TYPE']
         );
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
-        curl_setopt($ch, CURLOPT_URL, $requestUri);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
