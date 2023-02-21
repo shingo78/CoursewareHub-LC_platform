@@ -64,13 +64,16 @@ function redirect_to_hub()
         $res_body = substr($result, $info["header_size"]);
 
         http_response_code($info["http_code"]);
+        error_log('All Response Header: ' . $res_header);
         $res_headers = array_slice(explode(PHP_EOL, $res_header), 1);
         foreach($h as $res_headers) {
+            error_log('Response Header: ' . $h);
             $key_value = explode(':', $h, 2);
             if (count($key_value) != 2) {
                 continue;
             }
             if (!in_array(strtolower($key_value[0]), $HOP_BY_HOP_HEADERS, true)) {
+                error_log('Proxy Response Header: ' . $h);
                 header($h);
             }
         }
