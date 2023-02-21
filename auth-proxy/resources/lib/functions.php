@@ -16,9 +16,6 @@ function redirect_to_hub()
         header("X-Accel-Redirect: /entrance/");
         header("X-Reproxy-URL: ".$reproxy_url);
     } elseif ($_SERVER['REQUEST_METHOD'] == 'POST') {
-        $post_body = file_get_contents('php://input');
-        error_log('post body:' . $post_body);
-
         $ch = curl_init($reproxy_url);
         if ($_SERVER['HTTPS']) {
             $proto = 'https';
@@ -38,13 +35,16 @@ function redirect_to_hub()
             'Accept: ' . $_SERVER['HTTP_ACCEPT'],
             'Accept-Encoding: ' . $_SERVER['HTTP_ACCEPT_ENCODING'],
             'Accept-Language: ' . $_SERVER['HTTP_ACCEPT_LANGUAGE'],
-            'Content-Type: ' . $_SERVER['CONTENT_TYPE']
         );
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $post_body);
+        if ($_SERVER['CONTENT_TYPE'] == 'application/x-www-form-urlencoded') {
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $_POST);
+        } elseif (str_starts_with($_SERVER['CONTENT_TYPE'], 'multipart/form-data') {
+            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($_POST));
+        }
         curl_exec($ch);
         curl_close($ch);
     } else {
