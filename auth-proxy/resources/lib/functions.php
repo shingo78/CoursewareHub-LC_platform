@@ -37,6 +37,7 @@ function redirect_to_hub()
             'Accept-Language: ' . $_SERVER['HTTP_ACCEPT_LANGUAGE'],
         );
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+        curl_setopt($ch, CURLOPT_HEADER, true);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
