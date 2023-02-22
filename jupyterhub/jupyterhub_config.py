@@ -40,9 +40,9 @@ class CoursewareHubLogoutHandler(LogoutHandler):
 class CoursewareHubRemoteUserLocalAuthenticator(RemoteUserLocalAuthenticator):
     def get_handlers(self, app):
         handlers = super().get_handlers(app)
-        handlers.append([
+        handlers.append(
             (r'/logout', CoursewareHubLogoutHandler)
-        ])
+        )
         return handlers
 
 c.JupyterHub.authenticator_class = CoursewareHubRemoteUserLocalAuthenticator
