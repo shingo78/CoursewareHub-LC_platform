@@ -34,7 +34,7 @@ c.Registry.username = os.environ.get('REGISTRY_USER', 'cwh')
 c.Registry.password = os.environ['REGISTRY_PASSWORD']
 
 class CoursewareHubLogoutHandler(LogoutHandler):
-    async def handle_logout(self):
+    async def render_logout_page(self):
         self.redirect('/php/logout.php', permanent=False)
 
 class CoursewareHubRemoteUserLocalAuthenticator(RemoteUserLocalAuthenticator):
