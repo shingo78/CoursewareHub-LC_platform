@@ -16,10 +16,17 @@ $HOP_BY_HOP_HEADERS = array_map('strtolower', [
     "Upgrade"
 ]);
 
+$PROXY_HEADERS = array_map('strtolower', [
+    'X-Real-IP',
+    'X-Forwarded-For',
+    'X-Forwarded-Proto',
+    'X-Scheme',
+]);
+
 
 function redirect_to_hub()
 {
-    global $HOP_BY_HOP_HEADERS;
+    global $HOP_BY_HOP_HEADERS, $PROXY_HEADERS;
 
     $reproxy_url = HUB_URL.implode('/', array_map('rawurlencode', explode('/', $_SERVER['HTTP_X_REPROXY_URI'])));
     if (array_key_exists('HTTP_X_REPROXY_QUERY', $_SERVER)) {
@@ -35,20 +42,29 @@ function redirect_to_hub()
         } else {
             $proto = 'http';
         }
-        $headers = array (
-            'X-Real-IP: ', $_SERVER['REMOTE_ADDR'],
-            'Host: ', $_SERVER['HTTP_HOST'],
-            'User-Agent' . $_SERVER['HTTP_USER_AGENT'],
-            'Referer' . $_SERVER['HTTP_REFERER'],
-            'Origin' . $_SERVER['HTTP_ORIGIN'],
-            'Cookie: ' . $_SERVER['HTTP_COOKIE'],
-            'X-Forwarded-For: ', $_SERVER['HTTP_X_FORWARDED_FOR'],
-            'X-Forwarded-Proto: ', $proto,
-            'X-Scheme: ' . $proto,
-            'Accept: ' . $_SERVER['HTTP_ACCEPT'],
-            'Accept-Encoding: ' . $_SERVER['HTTP_ACCEPT_ENCODING'],
-            'Accept-Language: ' . $_SERVER['HTTP_ACCEPT_LANGUAGE'],
+        if (array_key_exists('HTTP_X_FORWARDED_FOR', $_SERVER)) {
+            $forwarded_for = $_SERVER['HTTP_X_FORWARDED_FOR'] . "," . $_SERVER['SERVER_ADDR'];
+        } else {
+            $forwarded_for = $_SERVER['REMOTE_ADDR'] . "," . $_SERVER['SERVER_ADDR'];
+        }
+        $proxy_headers = array (
+            'X-Real-IP' => $_SERVER['REMOTE_ADDR'],
+            'X-Forwarded-For' => $forwarded_for,
+            'X-Forwarded-Proto' => $proto,
+            'X-Scheme' => $proto,
         );
+        $headers = array();
+        $req_headers = getallheaders();
+        foreach ($req_headers as $name => $value) {
+            if (!in_array(strtolower($name), $PROXY_HEADERS, true) &&
+                    !in_array(strtolower($name), $HOP_BY_HOP_HEADERS, true)) {
+                $headers[] = "$name: $value";
+            }
+        }
+        foreach ($proxy_headers as $name => $value) {
+            $headers[] = "$name: $value";
+        }
+
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
         curl_setopt($ch, CURLOPT_HEADER, true);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
