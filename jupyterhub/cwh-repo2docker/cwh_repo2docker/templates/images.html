@@ -27,7 +27,7 @@
       {%- endif %}
       {% for image in images %}
       <tr class="image-row" data-image="{{ image.image_name }}" data-display-name="{{ image.display_name }}" data-image-repo="{{ image.repo }}" data-image-ref="{{ image.ref }}" data-image-id="{{ image.image_id }}">
-        <td class="repo-col col-sm-3">
+        <td class="repo-col col-sm-2">
           {{ image.display_name }}
         </td>
         <td class="repo-col col-sm-3">
@@ -47,11 +47,11 @@
         <td class="image-id-col col-sm-1">
           {{ image.short_image_id }}
         </td>
-        <td class="default-col col-sm-1">
-          {% if image.status == 'built'%}
+        <td class="default-col col-sm-2">
+          {% if image.status != 'building'%}
           {% if image.default_course_image %}
           <label class="btn btn-xs active">
-            <input class="set-default-course-image" type="radio" checked="checked"">
+            <input class="set-default-course-image" type="radio" checked="checked">
           </label>
           {% else %}
           <label class="btn btn-xs">
