@@ -239,6 +239,7 @@ class Registry(SingletonConfigurable):
                         "image_id": config['digest'],
                         "short_image_id": _short_id(config['digest']),
                         "status": "-",
+                        "config": config["data"],
                         "default_course_image": False,
                         "initial_course_image": True,
                     }
@@ -253,6 +254,7 @@ class Registry(SingletonConfigurable):
                         "image_id": config['digest'],
                         "short_image_id": _short_id(config['digest']),
                         "status": "built",
+                        "config": config["data"],
                         "default_course_image": False,
                         "initial_course_image": False,
                     })

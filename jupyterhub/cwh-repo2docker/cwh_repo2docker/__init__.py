@@ -91,7 +91,7 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
         if not default_course_images:
             self._use_initial_course_image(images)
             return
-        self.cmd = default_course_images[0]['cmd']
+        self.cmd = default_course_images[0]['config']['config']['Cmd']
 
     def _use_initial_course_image(self, images):
         registry = get_registry(parent=self)
@@ -101,7 +101,7 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
         initial_course_images = [i for i in images if i['initial_course_image']]
         if not initial_course_images:
             raise RuntimeError("Initial course image NOT found")
-        self.cmd = initial_course_images[0]['cmd']
+        self.cmd = initial_course_images[0]['config']['config']['Cmd']
 
     async def get_command(self):
         """get command from registry instead of local image."""
