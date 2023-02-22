@@ -2,6 +2,7 @@ from inspect import isawaitable
 from jupyterhub.handlers.base import BaseHandler
 from jupyterhub.scopes import needs_scope
 from tornado import web
+import json
 
 from .docker import list_containers
 from .registry import get_registry
