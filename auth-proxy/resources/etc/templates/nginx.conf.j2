@@ -79,10 +79,6 @@ http {
             rewrite /login /php/login.php permanent;
         }
 
-        location ^~ /hub/logout {
-            rewrite /hub/logout /php/logout.php permanent;
-        }
-
         location ^~ /no_author {
             internal;
             rewrite /no_author /html/no_author.html break;
