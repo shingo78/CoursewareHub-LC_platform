@@ -35,9 +35,14 @@ class DefaultCouseImageHandler(BaseHandler):
     @web.authenticated
     @needs_scope('admin-ui')
     async def post(self):
-        repo = self.get_body_argument('repo')
-        ref = self.get_body_argument('ref')
+        data = self.get_json_body()
+        repo = data["repo"]
+        ref = data["ref"]
 
-        get_registry(parent=self).set_default_course_image(repo, ref)
+        await get_registry(parent=self).set_default_course_image(repo, ref)
+
+        self.set_status(200)
+        self.finish(json.dumps({"status": "ok"}))
+
         
 
