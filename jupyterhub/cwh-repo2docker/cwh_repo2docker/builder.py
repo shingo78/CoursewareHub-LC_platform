@@ -2,7 +2,6 @@ import json
 import re
 
 from aiodocker import Docker, DockerError
-from aiohttp import web as aiohttp_web
 from jupyterhub.apihandlers import APIHandler
 from jupyterhub.scopes import needs_scope
 from tornado import web
@@ -29,16 +28,13 @@ class BuildHandler(APIHandler):
         local_image_name = f"{registry.host}/name"
         image_name, ref = split_image_name(name)
 
-        try:
-            await registry.delete_image(image_name, ref)
-        except aiohttp_web.HTTPError as e:
-            raise web.HTTPError(e.status, e.reason)
+        await registry.delete_image(image_name, ref)
 
         async with Docker() as docker:
             try:
                 await docker.images.delete(local_image_name)
             except DockerError as e:
-                raise web.HTTPError(e.status, e.message)
+                raise web.HTTPError(500, e.message)
 
         self.set_status(200)
         self.finish(json.dumps({"status": "ok"}))
