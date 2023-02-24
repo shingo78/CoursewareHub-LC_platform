@@ -45,13 +45,13 @@ require([
   $(".set-default-course-image").click(function() {
     var el = $(this);
     var row = getRow(el);
-    var repo = row.data('image');
-    var ref = row.data('manifest-digest');
+    var name = row.data('image');
+    var digest = row.data('manifest-digest');
     api.api_request("environments/default-course-image", {
-      type: "POST",
+      type: "PUT",
       data: JSON.stringify({
-        repo: repo,
-        ref: ref
+        name: name,
+        digest: digest
       }),
       success: function() {
         window.location.reload();
