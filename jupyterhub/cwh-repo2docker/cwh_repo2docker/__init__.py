@@ -62,7 +62,7 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
         """,
     )
 
-    async def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self._registry = get_registry(config=self.config)
