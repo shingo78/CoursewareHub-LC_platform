@@ -209,10 +209,12 @@ class Registry(SingletonConfigurable):
                 ref = config['reference']
                 image_name_ref = f'{name}:{ref}'
                 if self.default_course_image == image_name_ref:
-                    self.log.debug('found default course image: %s labels=%s', image_name_ref, labels)
+                    self.log.debug('found default course image: %s labels=%s, digest=%s',
+                                   image_name_ref, labels, config['digest'])
                     default_course_image = config['digest']
                 elif self.initial_course_image == image_name_ref:
-                    self.log.debug('found initial course image: %s labels=%s', image_name_ref, labels)
+                    self.log.debug('found initial course image: %s labels=%s digest=%s',
+                                   image_name_ref, labels, config['digest'])
                     initial_course_image = {
                         "repo": '-',
                         "ref": '-',
@@ -227,7 +229,8 @@ class Registry(SingletonConfigurable):
                     }
                 elif ('cwh_repo2docker.image_name' in labels and
                         image_name_ref == labels['cwh_repo2docker.image_name']):
-                    self.log.debug('found repo2docker course image: %s labels=%s', image_name_ref, labels)
+                    self.log.debug('found repo2docker course image: %s labels=%s digest=%s',
+                                   image_name_ref, labels, config['digest'])
                     images.append({
                         "repo": labels["repo2docker.repo"],
                         "ref": labels["repo2docker.ref"],
@@ -243,14 +246,13 @@ class Registry(SingletonConfigurable):
                 else:
                     self.log.debug('not course image: %s labels=%s', image_name_ref, labels)
 
+            if initial_course_image:
+                images.append(initial_course_image)
 
             if default_course_image:
                 for image in images:
                     if image['image_id'] == default_course_image:
                         image['default_course_image'] = True
-
-            if initial_course_image:
-                images.append(initial_course_image)
 
             return images
 
