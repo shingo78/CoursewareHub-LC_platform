@@ -24,7 +24,7 @@ class BuildHandler(APIHandler):
         data = self.get_json_body()
         name = data["name"]
 
-        registry = get_registry(parent=self)
+        registry = get_registry(config=self.settings['config'])
 
         local_image_name = f"{registry.host}/name"
         image_name, ref = split_image_name(name)
@@ -73,7 +73,7 @@ class BuildHandler(APIHandler):
                     )
                 extra_buildargs.append(barg)
 
-        registry = get_registry(parent=self)
+        registry = get_registry(config=self.settings['config'])
 
         await build_image(registry.host, repo, ref, name, username, password, extra_buildargs)
 

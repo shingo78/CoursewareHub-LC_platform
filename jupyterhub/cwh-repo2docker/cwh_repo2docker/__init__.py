@@ -62,12 +62,16 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
         """,
     )
 
+    async def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._registry = get_registry(config=self.config)
+
     async def get_options_form(self):
         """
         Override the default form to handle the case when there is only one image.
         """
-        registry = get_registry(parent=self)
-        images = await registry.list_images()
+        images = await self._registry.list_images()
 
         if not self.user.admin:
             self._use_default_course_image(images)
@@ -83,9 +87,7 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
         return image_form_template.render(image_list=images, registry_host=registry.host)
 
     def _use_default_course_image(self, images):
-        registry = get_registry(parent=self)
-
-        self.image = registry.get_default_course_image()
+        self.image = self._registry.get_default_course_image()
 
         default_course_images = [i for i in images if i['default_course_image']]
         if not default_course_images:
@@ -94,9 +96,8 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
         self.cmd = default_course_images[0]['config']['config']['Cmd']
 
     def _use_initial_course_image(self, images):
-        registry = get_registry(parent=self)
 
-        self.image = registry.get_initial_course_image()
+        self.image = self._registry.get_initial_course_image()
 
         initial_course_images = [i for i in images if i['initial_course_image']]
         if not initial_course_images:
@@ -117,10 +118,9 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
             else:
                 host, image_name = ('', parts[0])
 
-            registry = get_registry(parent=self)
-            if host == registry.host:
+            if host == self._registry.host:
                 name, ref = split_image_name(image_name)
-                config = await registry.inspect_image(name, ref)
+                config = await self._registry.inspect_image(name, ref)
                 cmd = config['data']['config']['Cmd']
             else:
                 image_info = await self.docker("inspect_image", self.image)
@@ -131,12 +131,11 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
         return cmd + self.get_args()
 
     async def create_object(self, *args, **kwargs):
-        registry = get_registry(parent=self)
         self.docker(
             'login',
-            username=registry.username,
-            password=registry.password,
-            registry=registry.get_registry_url())
+            username=self._registry.username,
+            password=self._registry.password,
+            registry=self._registry.get_registry_url())
         return await super().create_object(*args, **kwargs)
 
 

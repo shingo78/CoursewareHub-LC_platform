@@ -15,7 +15,7 @@ class ImagesHandler(BaseHandler):
     @web.authenticated
     @needs_scope('admin-ui')
     async def get(self):
-        registry = get_registry(parent=self)
+        registry = get_registry(config=self.settings['config'])
         images = await registry.list_images()
         containers = await list_containers()
         result = self.render_template(
@@ -40,7 +40,8 @@ class DefaultCouseImageHandler(BaseHandler):
         repo = data["repo"]
         ref = data["ref"]
 
-        await get_registry(parent=self).set_default_course_image(repo, ref)
+        registry = get_registry(config=self.settings['config'])
+        await registry.set_default_course_image(repo, ref)
 
         self.set_status(200)
         self.finish(json.dumps({"status": "ok"}))
