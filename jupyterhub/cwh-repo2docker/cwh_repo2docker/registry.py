@@ -187,8 +187,8 @@ class Registry(SingletonConfigurable):
             url = self.get_registry_url()
             self.log.debug('registry host=%s, registry url=%s', self.host, url)
 
-            repos = self._list_image_names(session)
-            manifests = self._list_manifests(session, repos)
+            repos = await self._list_image_names(session)
+            manifests = await self._list_manifests(session, repos)
 
             tasks = []
             for manifest in manifests:
@@ -273,9 +273,9 @@ class Registry(SingletonConfigurable):
                     f'{url}{name}/manifests/{manifest_digest}') as resp:
                 await resp.json()
 
-            repos = self._list_image_names(session)
+            repos = await self._list_image_names(session)
             repos = [r for r in repos if r[0] != name and r[1] != ref]
-            marked_layers = self._mark_blobs(session, repos)
+            marked_layers = await self._mark_blobs(session, repos)
 
             tasks = []
             config = manifest['config']
@@ -321,7 +321,7 @@ class Registry(SingletonConfigurable):
         return manifests
 
     async def _mark_blobs(self, session, images):
-        manifests = self._list_manifests(session, images)
+        manifests = await self._list_manifests(session, images)
         digests = set()
         for manifest in manifests:
             digests.update(
