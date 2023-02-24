@@ -1,5 +1,6 @@
 from inspect import isawaitable
 from jupyterhub.handlers.base import BaseHandler
+from jupyterhub.apihandlers import APIHandler
 from jupyterhub.scopes import needs_scope
 from tornado import web
 import json
@@ -28,7 +29,7 @@ class ImagesHandler(BaseHandler):
             self.write(result)
 
 
-class DefaultCouseImageHandler(BaseHandler):
+class DefaultCouseImageHandler(APIHandler):
     """
     Handler to update the default course image
     """
