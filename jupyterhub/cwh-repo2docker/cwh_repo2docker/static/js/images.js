@@ -46,7 +46,7 @@ require([
     var el = $(this);
     var row = getRow(el);
     var repo = row.data('image');
-    var ref = row.data('image-id');
+    var ref = row.data('manifest-digest');
     api.api_request("environments/default-course-image", {
       type: "POST",
       data: JSON.stringify({

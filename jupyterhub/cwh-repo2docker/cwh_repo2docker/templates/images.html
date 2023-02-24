@@ -26,7 +26,7 @@
       No available course images
       {%- endif %}
       {% for image in images %}
-      <tr class="image-row" data-image="{{ image.image_name }}" data-display-name="{{ image.display_name }}" data-image-repo="{{ image.repo }}" data-image-ref="{{ image.ref }}" data-image-id="{{ image.image_id }}">
+      <tr class="image-row" data-image="{{ image.image_name }}" data-display-name="{{ image.display_name }}" data-image-repo="{{ image.repo }}" data-image-ref="{{ image.ref }}" data-image-id="{{ image.image_id }}" data-manifest-digest="{{ image.manifest_digest }}">
         <td class="repo-col col-sm-2">
           {{ image.display_name }}
         </td>

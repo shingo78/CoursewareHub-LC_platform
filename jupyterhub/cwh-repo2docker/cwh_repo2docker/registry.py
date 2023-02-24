@@ -222,6 +222,7 @@ class Registry(SingletonConfigurable):
                         "display_name": 'initial',
                         "image_id": config['digest'],
                         "short_image_id": _short_id(config['digest']),
+                        "manifest_digest": config['manifest']['digest'],
                         "status": "-",
                         "config": config["data"],
                         "default_course_image": False,
@@ -238,6 +239,7 @@ class Registry(SingletonConfigurable):
                         "display_name": labels["cwh_repo2docker.display_name"],
                         "image_id": config['digest'],
                         "short_image_id": _short_id(config['digest']),
+                        "manifest_digest": config['manifest']['digest'],
                         "status": "built",
                         "config": config["data"],
                         "default_course_image": False,
@@ -331,7 +333,6 @@ class Registry(SingletonConfigurable):
             )
         return digests
 
-
     async def set_default_course_image(self, name, ref):
         new_name, new_ref = split_image_name(self.default_course_image)
         return await self.set_name_tag(
@@ -347,4 +348,4 @@ class Registry(SingletonConfigurable):
                 session,
                 url,
                 new_name, new_tag,
-                manifest['manifest'])
+                manifest['data'])
