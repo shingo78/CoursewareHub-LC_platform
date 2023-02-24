@@ -75,3 +75,22 @@ class BuildHandler(APIHandler):
 
         self.set_status(200)
         self.finish(json.dumps({"status": "ok"}))
+
+
+class DefaultCouseImageHandler(APIHandler):
+    """
+    Handler to update the default course image
+    """
+
+    @web.authenticated
+    @needs_scope('admin-ui')
+    async def post(self):
+        data = self.get_json_body()
+        repo = data["repo"]
+        ref = data["ref"]
+
+        registry = get_registry(config=self.settings['config'])
+        await registry.set_default_course_image(repo, ref)
+
+        self.set_status(200)
+        self.finish(json.dumps({"status": "ok"}))

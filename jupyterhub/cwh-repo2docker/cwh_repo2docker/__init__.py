@@ -5,9 +5,9 @@ from jinja2 import Environment, BaseLoader
 from jupyterhub.handlers.static import CacheControlStaticFilesHandler
 from traitlets import Unicode
 
-from .builder import BuildHandler
+from .builder import BuildHandler, DefaultCouseImageHandler
 from .registry import get_registry, split_image_name
-from .images import ImagesHandler, DefaultCouseImageHandler
+from .images import ImagesHandler
 from .logs import LogsHandler
 
 
