@@ -30,7 +30,7 @@ class BuildHandler(APIHandler):
         image_name, ref = split_image_name(name)
 
         try:
-            await registry.delete(image_name, ref)
+            await registry.delete_image(image_name, ref)
         except aiohttp_web.HTTPError as e:
             raise web.HTTPError(e.status, e.reason)
 

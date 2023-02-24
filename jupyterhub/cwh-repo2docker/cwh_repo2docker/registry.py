@@ -186,27 +186,9 @@ class Registry(SingletonConfigurable):
         async with aiohttp.ClientSession(auth=self._get_auth()) as session:
             url = self.get_registry_url()
             self.log.debug('registry host=%s, registry url=%s', self.host, url)
-            repos_dict = await _get_repos(session, url)
-            repo_names = repos_dict['repositories']
 
-            tasks = []
-            for name in repo_names:
-                tasks.append(asyncio.ensure_future(
-                    _get_tags(session, url, name)))
-
-            taginfos = await asyncio.gather(*tasks)
-            repos = []
-            for taginfo in taginfos:
-                name = taginfo['name']
-                tags = taginfo['tags']
-                for tag in tags:
-                    repos.append((name, tag))
-
-            tasks = []
-            for name, tag in repos:
-                tasks.append(asyncio.ensure_future(
-                        _get_manifest(session, url, name, tag)))
-            manifests = await asyncio.gather(*tasks)
+            repos = self._list_image_names(session)
+            manifests = self._list_manifests(session, repos)
 
             tasks = []
             for manifest in manifests:
@@ -280,7 +262,7 @@ class Registry(SingletonConfigurable):
 
             return await _get_config(session, url, name, ref, manifest)
 
-    async def delete(self, name, ref):
+    async def delete_image(self, name, ref):
         async with aiohttp.ClientSession(auth=self._get_auth()) as session:
             url = self.get_registry_url()
 
@@ -291,6 +273,10 @@ class Registry(SingletonConfigurable):
                     f'{url}{name}/manifests/{manifest_digest}') as resp:
                 await resp.json()
 
+            repos = self._list_image_names(session)
+            repos = [r for r in repos if r[0] != name and r[1] != ref]
+            marked_layers = self._mark_blobs(session, repos)
+
             tasks = []
             config = manifest['config']
             tasks.append(asyncio.ensure_future(
@@ -298,10 +284,51 @@ class Registry(SingletonConfigurable):
 
             layers = manifest['layers']
             for layer in layers:
-                tasks.append(asyncio.ensure_future(
-                    _delete_blob(session, url, name, layer['digest'])))
+                if (layer['digest'] not in marked_layers):
+                    tasks.append(asyncio.ensure_future(
+                        _delete_blob(session, url, name, layer['digest'])))
 
             await asyncio.gather(*tasks)
+
+    async def _list_image_names(self, session):
+        url = self.get_registry_url()
+        repos_dict = await _get_repos(session, url)
+        repo_names = repos_dict['repositories']
+
+        tasks = []
+        for name in repo_names:
+            tasks.append(asyncio.ensure_future(
+                _get_tags(session, url, name)))
+
+        taginfos = await asyncio.gather(*tasks)
+        repos = []
+        for taginfo in taginfos:
+            name = taginfo['name']
+            tags = taginfo.get('tags')
+            if tags is None:
+                continue
+            for tag in tags:
+                repos.append((name, tag))
+        return repos
+
+    async def _list_manifests(self, session, repos):
+        tasks = []
+        url = self.get_registry_url()
+        for name, tag in repos:
+            tasks.append(asyncio.ensure_future(
+                    _get_manifest(session, url, name, tag)))
+        manifests = await asyncio.gather(*tasks)
+        return manifests
+
+    async def _mark_blobs(self, session, images):
+        manifests = self._list_manifests(session, images)
+        digests = set()
+        for manifest in manifests:
+            digests.update(
+                [l['digest'] for l in manifest['data']['layers']]
+            )
+        return digests
+
 
     async def set_default_course_image(self, name, ref):
         new_name, new_ref = split_image_name(self.default_course_image)
