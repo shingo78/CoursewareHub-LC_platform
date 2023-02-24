@@ -58,9 +58,15 @@
         </td>
         <td class="build-col col-sm-2 text-center">
           {% if image.status == 'built' %}
+          {% if image.default_course_image %}
           <a role="button" class="remove-environment btn btn-xs btn-danger">
             Remove
           </a>
+          {% else %}
+          <a role="button" class="remove-environment btn btn-xs btn-danger disabled">
+            Remove
+          </a>
+          {%- endif %}
           {%- elif image.status == 'building' %}
           <p class="bg-info">
             The environment is under construction. This can take several minutes to complete.<br>
