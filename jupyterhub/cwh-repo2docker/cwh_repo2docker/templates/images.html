@@ -50,13 +50,9 @@
         <td class="default-col col-sm-2">
           {% if image.status != 'building'%}
           {% if image.default_course_image %}
-          <label class="btn btn-xs active">
-            <input class="set-default-course-image" type="radio" checked="checked">
-          </label>
+          <input class="form-check-input set-default-course-image" type="radio" checked>
           {% else %}
-          <label class="btn btn-xs">
-            <input class="set-default-course-image" type="radio">
-          </label>
+          <input class="form-check-input set-default-course-image" type="radio">
           {%- endif %}
           {%- endif %}
         </td>
