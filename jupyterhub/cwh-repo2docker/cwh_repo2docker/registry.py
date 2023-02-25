@@ -340,7 +340,7 @@ class Registry(SingletonConfigurable):
         digests = set()
         for manifest in manifests:
             digests.update(
-                [l['digest'] for l in manifest['data']['layers']]
+                [layer['digest'] for layer in manifest['data']['layers']]
             )
         return digests
 
@@ -356,6 +356,9 @@ class Registry(SingletonConfigurable):
             manifest = await _get_manifest(session, url, src_name, src_tag)
 
             tasks = []
+            config_digest = manifest['data']['config']['digest']
+            tasks.append(asyncio.ensure_future(_mount_blob(
+                session, url, new_name, config_digest, src_name)))
             layers = manifest['data']['layers']
             for layer in layers:
                 digest = layer['digest']

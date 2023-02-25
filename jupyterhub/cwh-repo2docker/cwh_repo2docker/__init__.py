@@ -15,7 +15,7 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
     """
     A custom spawner for using Docker images built with cwh-repo2docker.
     """
-    
+
     image_form_template = Unicode(
         """
         <style>
@@ -139,7 +139,6 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
         return await super().create_object(*args, **kwargs)
 
 
-
 def cwh_repo2docker_jupyterhub_config(c):
     # hub
     c.JupyterHub.spawner_class = Repo2DockerSpawner
@@ -163,4 +162,3 @@ def cwh_repo2docker_jupyterhub_config(c):
             ),
         ]
     )
-
