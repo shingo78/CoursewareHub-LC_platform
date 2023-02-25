@@ -59,6 +59,16 @@ async def _get_blob(session, url, repo, digest):
         return await resp.read()
 
 
+async def _mount_blob(session, url, name, digest, from_name):
+    async with session.post(
+            f'{url}{name}/blobs/uploads',
+            params={
+                'mount': digest,
+                'from': from_name
+            }) as resp:
+        return await resp.read()
+
+
 async def _get_config(session, url, repo, ref, manifest):
     config_digest = manifest['data']['config']['digest']
     config_blob = await _get_blob(
@@ -286,7 +296,7 @@ class Registry(SingletonConfigurable):
             tasks.append(asyncio.ensure_future(
                 _delete_blob(session, url, name, config['digest'])))
 
-            layers = manifest['layers']
+            layers = manifest['data']['layers']
             for layer in layers:
                 if (layer['digest'] not in marked_layers):
                     tasks.append(asyncio.ensure_future(
@@ -343,6 +353,14 @@ class Registry(SingletonConfigurable):
             url = self.get_registry_url()
 
             manifest = await _get_manifest(session, url, src_name, src_tag)
+
+            tasks = []
+            layers = manifest['data']['layers']
+            for layer in layers:
+                digest = layer['digest']
+                tasks.append(asyncio.ensure_future(
+                    _mount_blob(session, url, new_name, digest, src_name)))
+            await asyncio.gather(*tasks)
 
             return await _put_manifest(
                 session,

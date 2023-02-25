@@ -59,11 +59,11 @@
         <td class="build-col col-sm-2 text-center">
           {% if image.status == 'built' %}
           {% if image.default_course_image %}
-          <a role="button" class="remove-environment btn btn-xs btn-danger">
+          <a role="button" class="remove-environment btn btn-xs btn-danger disabled">
             Remove
           </a>
           {% else %}
-          <a role="button" class="remove-environment btn btn-xs btn-danger disabled">
+          <a role="button" class="remove-environment btn btn-xs btn-danger">
             Remove
           </a>
           {%- endif %}
