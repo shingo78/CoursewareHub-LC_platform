@@ -8,6 +8,7 @@ from traitlets import (
     Bool
 )
 from traitlets.config import SingletonConfigurable
+from yarl import URL
 
 CONTENT_TYPE_MANIFEST_V2_2 = 'application/vnd.docker.distribution.manifest.v2+json'
 
@@ -60,12 +61,12 @@ async def _get_blob(session, url, repo, digest):
 
 
 async def _mount_blob(session, url, name, digest, from_name):
-    async with session.post(
-            f'{url}{name}/blobs/uploads',
-            params={
-                'mount': digest,
-                'from': from_name
-            }) as resp:
+    query = URL(f'{url}{name}/blobs/uploads')
+    query = query.with_query({
+        'mount': digest,
+        'from': from_name
+    })
+    async with session.post(query) as resp:
         return await resp.read()
 
 
