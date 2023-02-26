@@ -8,7 +8,7 @@ from traitlets import (
     Bool
 )
 from traitlets.config import SingletonConfigurable
-from yarl import URL
+
 
 CONTENT_TYPE_MANIFEST_V2_2 = 'application/vnd.docker.distribution.manifest.v2+json'
 
@@ -17,7 +17,7 @@ def get_registry(*args, **kwargs):
     return Registry.instance(*args, **kwargs)
 
 
-async def _get_manifest(session, url, name, ref):
+async def _get_manifest(session: aiohttp.ClientSession, url, name, ref):
     headers = {
         'Accept': CONTENT_TYPE_MANIFEST_V2_2
     }
@@ -33,7 +33,7 @@ async def _get_manifest(session, url, name, ref):
         }
 
 
-async def _put_manifest(session, url, name, ref, manifest):
+async def _put_manifest(session: aiohttp.ClientSession, url, name, ref, manifest):
     headers = {
         'Content-Type': CONTENT_TYPE_MANIFEST_V2_2
     }
@@ -44,30 +44,39 @@ async def _put_manifest(session, url, name, ref, manifest):
         return await resp.json()
 
 
-async def _get_tags(session, url, repo):
+async def _get_tags(session: aiohttp.ClientSession, url, repo):
     async with session.get(f'{url}{repo}/tags/list') as resp:
         return await resp.json()
 
 
-async def _get_repos(session, url):
+async def _get_repos(session: aiohttp.ClientSession, url):
     async with session.get(f'{url}_catalog') as resp:
         return await resp.json()
 
 
-async def _get_blob(session, url, repo, digest):
+async def _get_blob(session: aiohttp.ClientSession, url, repo, digest):
     async with session.get(
             f'{url}{repo}/blobs/{digest}') as resp:
         return await resp.read()
 
 
-async def _mount_blob(session, url, name, digest, from_name):
-    query = URL(f'{url}{name}/blobs/uploads')
-    query = query.with_query({
-        'mount': digest,
-        'from': from_name
-    })
-    async with session.post(query) as resp:
-        return await resp.read()
+async def _mount_blob(session: aiohttp.ClientSession, url, name, digest, from_name):
+    async with session.post(
+            f'{url}{name}/blobs/uploads',
+            params={
+                'mount': digest,
+                'from': from_name
+            },
+            headers={
+                'Content-Length': '0'
+            },
+            allow_redirects=False) as resp:
+        await resp.read()
+        headers = resp.headers()
+        return {
+            'location': headers['Location'],
+            'upload-uuid': headers['Docker-Upload-UUID']
+        }
 
 
 async def _get_config(session, url, repo, ref, manifest):
