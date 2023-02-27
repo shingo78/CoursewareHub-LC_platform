@@ -84,7 +84,7 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
         image_form_template = Environment(loader=BaseLoader).from_string(
             self.image_form_template
         )
-        return image_form_template.render(image_list=images, registry_host=registry.host)
+        return image_form_template.render(image_list=images, registry_host=self.registry.host)
 
     def _use_default_course_image(self, images):
         self.image = self._registry.get_default_course_image()
