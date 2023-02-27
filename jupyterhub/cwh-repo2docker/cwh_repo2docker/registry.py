@@ -72,10 +72,9 @@ async def _mount_blob(session: aiohttp.ClientSession, url, name, digest, from_na
             },
             allow_redirects=False) as resp:
         await resp.read()
-        headers = resp.headers()
         return {
-            'location': headers['Location'],
-            'upload-uuid': headers['Docker-Upload-UUID']
+            'location': resp.headers['Location'],
+            'upload-uuid': resp.headers['Docker-Upload-UUID']
         }
 
 
