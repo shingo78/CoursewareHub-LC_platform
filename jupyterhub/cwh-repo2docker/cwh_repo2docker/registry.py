@@ -1,6 +1,7 @@
 import aiohttp
 import asyncio
 import json
+from urllib.parse import urlencode
 
 from textwrap import dedent
 from traitlets import (
@@ -363,18 +364,16 @@ class Registry(SingletonConfigurable):
                 manifest['data'])
 
     async def _mount_blob(self, session: aiohttp.ClientSession, url, name, digest, from_name):
+        params = urlencode({
+            'mount':  digest,
+            'from': from_name
+        })
         async with session.post(
-                f'{url}{name}/blobs/uploads',
-                params={
-                    'mount': digest,
-                    'from': from_name
-                },
-                headers={
-                    'Content-Length': '0'
-                },
+                f'{url}{name}/blobs/uploads?{params}',
                 allow_redirects=False) as resp:
             await resp.read()
             self.log.debug('_mount_blob: response header: %s', str(resp.headers))
+            self.log.debug('_mount_blob: status: %d', resp.status)
             return {
                 'location': resp.headers['Location'],
                 'upload-uuid': resp.headers.get('Docker-Upload-UUID'),
