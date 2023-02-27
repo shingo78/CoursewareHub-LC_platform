@@ -60,24 +60,6 @@ async def _get_blob(session: aiohttp.ClientSession, url, repo, digest):
         return await resp.read()
 
 
-async def _mount_blob(session: aiohttp.ClientSession, url, name, digest, from_name):
-    async with session.post(
-            f'{url}{name}/blobs/uploads',
-            params={
-                'mount': digest,
-                'from': from_name
-            },
-            headers={
-                'Content-Length': '0'
-            },
-            allow_redirects=False) as resp:
-        await resp.read()
-        return {
-            'location': resp.headers['Location'],
-            'upload-uuid': resp.headers['Docker-Upload-UUID']
-        }
-
-
 async def _get_config(session, url, repo, ref, manifest):
     config_digest = manifest['data']['config']['digest']
     config_blob = await _get_blob(
@@ -365,13 +347,13 @@ class Registry(SingletonConfigurable):
 
             tasks = []
             config_digest = manifest['data']['config']['digest']
-            tasks.append(asyncio.ensure_future(_mount_blob(
+            tasks.append(asyncio.ensure_future(self._mount_blob(
                 session, url, new_name, config_digest, src_name)))
             layers = manifest['data']['layers']
             for layer in layers:
                 digest = layer['digest']
                 tasks.append(asyncio.ensure_future(
-                    _mount_blob(session, url, new_name, digest, src_name)))
+                    self._mount_blob(session, url, new_name, digest, src_name)))
             await asyncio.gather(*tasks)
 
             return await _put_manifest(
@@ -379,3 +361,22 @@ class Registry(SingletonConfigurable):
                 url,
                 new_name, new_tag,
                 manifest['data'])
+
+    async def _mount_blob(self, session: aiohttp.ClientSession, url, name, digest, from_name):
+        async with session.post(
+                f'{url}{name}/blobs/uploads',
+                params={
+                    'mount': digest,
+                    'from': from_name
+                },
+                headers={
+                    'Content-Length': '0'
+                },
+                allow_redirects=False) as resp:
+            await resp.read()
+            self.log.debug('_mount_blob: response header: %s', str(resp.headers))
+            return {
+                'location': resp.headers['Location'],
+                'upload-uuid': resp.headers.get('Docker-Upload-UUID'),
+                'digest': resp.headers.get('Docker-Content-Digest')
+            }
