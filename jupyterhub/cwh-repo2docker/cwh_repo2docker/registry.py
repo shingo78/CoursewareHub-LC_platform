@@ -381,6 +381,6 @@ class Registry(SingletonConfigurable):
             self.log.debug('_mount_blob: status: %d', resp.status)
             return {
                 'location': resp.headers['Location'],
-                'upload-uuid': resp.headers.get('Docker-Upload-UUID'),
-                'digest': resp.headers.get('Docker-Content-Digest')
+                'digest': resp.headers.get('Docker-Content-Digest'),
+                'status': resp.status
             }
