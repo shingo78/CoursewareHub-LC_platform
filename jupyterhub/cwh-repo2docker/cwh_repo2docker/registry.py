@@ -42,7 +42,12 @@ async def _put_manifest(session: aiohttp.ClientSession, url, name, ref, manifest
             f'{url}{name}/manifests/{ref}',
             json=manifest,
             headers=headers) as resp:
-        return await resp.json()
+        await resp.read()
+        return {
+            'name': name,
+            'reference': ref,
+            'digest': resp.headers['Docker-Content-Digest']
+        }
 
 
 async def _get_tags(session: aiohttp.ClientSession, url, repo):
