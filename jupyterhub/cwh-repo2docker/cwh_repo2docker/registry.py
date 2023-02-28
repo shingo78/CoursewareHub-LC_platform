@@ -2,6 +2,7 @@ import aiohttp
 import asyncio
 import json
 from urllib.parse import urlencode
+from yarl import URL
 
 from textwrap import dedent
 from traitlets import (
@@ -46,7 +47,7 @@ async def _put_manifest(session: aiohttp.ClientSession, url, name, ref, manifest
         return {
             'name': name,
             'reference': ref,
-            'digest': resp.headers['Docker-Content-Digest']
+            'digest': resp.headers.get('Docker-Content-Digest')
         }
 
 
@@ -373,11 +374,11 @@ class Registry(SingletonConfigurable):
 
     async def _mount_blob(self, session: aiohttp.ClientSession, url, name, digest, from_name):
         params = urlencode({
-            'mount':  digest,
+            'mount': digest,
             'from': from_name
         })
         async with session.post(
-                f'{url}{name}/blobs/uploads?{params}',
+                URL(f'{url}{name}/blobs/uploads?{params}', encoded=True),
                 allow_redirects=False) as resp:
             await resp.read()
             self.log.debug('_mount_blob: response header: %s', str(resp.headers))
