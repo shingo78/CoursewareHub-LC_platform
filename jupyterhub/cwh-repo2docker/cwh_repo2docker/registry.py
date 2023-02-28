@@ -293,7 +293,6 @@ class Registry(SingletonConfigurable):
             await _delete_manifest(session, url, name, manifest_digest)
 
             tasks = []
-            config = manifest['config']
             tasks.append(asyncio.ensure_future(
                 _delete_blob(session, url, name, config['digest'])))
 
