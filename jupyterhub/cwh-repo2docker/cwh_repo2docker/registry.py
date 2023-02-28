@@ -50,6 +50,11 @@ async def _put_manifest(session: aiohttp.ClientSession, url, name, ref, manifest
         }
 
 
+async def _delete_manifest(session: aiohttp.ClientSession, url, name, manifest_digest):
+    async with session.delete(
+            f'{url}{name}/manifests/{manifest_digest}') as resp:
+        await resp.read()
+
 async def _get_tags(session: aiohttp.ClientSession, url, repo):
     async with session.get(f'{url}{repo}/tags/list') as resp:
         return await resp.json()
@@ -278,15 +283,14 @@ class Registry(SingletonConfigurable):
             url = self.get_registry_url()
 
             manifest = await _get_manifest(session, url, name, ref)
+            config = await _get_config(session, url, name, ref, manifest)
             manifest_digest = manifest['digest']
-
-            async with session.delete(
-                    f'{url}{name}/manifests/{manifest_digest}') as resp:
-                await resp.json()
 
             repos = await self._list_image_names(session)
             repos = [r for r in repos if r[0] != name and r[1] != ref]
             marked_layers = await self._mark_blobs(session, repos)
+
+            await _delete_manifest(session, url, name, manifest_digest)
 
             tasks = []
             config = manifest['config']
