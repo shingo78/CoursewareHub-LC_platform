@@ -25,7 +25,7 @@ class BuildHandler(APIHandler):
 
         registry = get_registry(config=self.settings['config'])
 
-        local_image_name = f"{registry.host}/name"
+        local_image_name = f"{registry.host}/{name}"
         image_name, ref = split_image_name(name)
 
         await registry.delete_image(image_name, ref)
