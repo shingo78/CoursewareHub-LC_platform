@@ -398,7 +398,7 @@ class Registry(SingletonConfigurable):
             'from': from_name
         })
         async with session.post(
-                URL(f'{url}{name}/blobs/uploads?{params}', encoded=True),
+                URL(f'{url}{name}/blobs/uploads/?{params}', encoded=True),
                 skip_auto_headers={
                     'Content-Type'
                 },
