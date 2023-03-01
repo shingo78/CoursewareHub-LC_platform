@@ -56,6 +56,7 @@ async def _delete_manifest(session: aiohttp.ClientSession, url, name, manifest_d
             f'{url}{name}/manifests/{manifest_digest}') as resp:
         await resp.read()
 
+
 async def _get_tags(session: aiohttp.ClientSession, url, repo):
     async with session.get(f'{url}{repo}/tags/list') as resp:
         return await resp.json()
@@ -89,6 +90,17 @@ async def _get_config(session, url, repo, ref, manifest):
 async def _delete_blob(session, url, repo, digest):
     async with session.delete(f'{url}{repo}/blobs/{digest}') as resp:
         await resp.read()
+
+
+async def _head_blob(session, url, repo, digest):
+    async with session.head(f'{url}{repo}/blobs/{digest}') as resp:
+        await resp.read()
+        if resp.status == 200:
+            return (
+                resp.headers['Content-Length'],
+                resp.headers['Docker-Content-Digest']
+            )
+        return None
 
 
 def split_image_name(image_name, default_tag='latest'):
@@ -364,7 +376,11 @@ class Registry(SingletonConfigurable):
                 digest = layer['digest']
                 tasks.append(asyncio.ensure_future(
                     self._mount_blob(session, url, new_name, digest, src_name)))
-            await asyncio.gather(*tasks)
+            mounted_blobs = await asyncio.gather(*tasks)
+            self.log.debug('mounted blobs: %s', str(mounted_blobs))
+
+            if (any([x is None for x in mounted_blobs])):
+                raise RuntimeError('faillure to mount blob')
 
             return await _put_manifest(
                 session,
@@ -373,6 +389,10 @@ class Registry(SingletonConfigurable):
                 manifest['data'])
 
     async def _mount_blob(self, session: aiohttp.ClientSession, url, name, digest, from_name):
+        blob = await _head_blob(session, url, name, digest)
+        if blob is not None:
+            return blob
+
         params = urlencode({
             'mount': digest,
             'from': from_name
@@ -381,10 +401,8 @@ class Registry(SingletonConfigurable):
                 URL(f'{url}{name}/blobs/uploads?{params}', encoded=True),
                 allow_redirects=False) as resp:
             await resp.read()
-            self.log.debug('_mount_blob: response header: %s', str(resp.headers))
-            self.log.debug('_mount_blob: status: %d', resp.status)
-            return {
-                'location': resp.headers['Location'],
-                'digest': resp.headers.get('Docker-Content-Digest'),
-                'status': resp.status
-            }
+            if resp.status != 201:
+                self.log.error('_mount_blob: unexpected response: %d', resp.status)
+                self.log.debug('_mount_blob: response header: %s', str(resp.headers))
+
+        return await _head_blob(session, url, name, digest)
