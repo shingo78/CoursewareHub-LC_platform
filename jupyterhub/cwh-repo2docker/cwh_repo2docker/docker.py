@@ -103,7 +103,7 @@ async def build_image(
                 "/var/run/docker.sock:/var/run/docker.sock",
                 "/root/.docker/config.json:/root/.docker/config.json:ro"
             ],
-            "AutoRemove": True
+            "AutoRemove": False
         },
         "Tty": False,
         "AttachStdout": False,
