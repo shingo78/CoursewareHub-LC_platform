@@ -60,7 +60,7 @@ async def build_image(
         "--user-id",
         "1100",
         "--appendix",
-        "ENV NB_USER=jovyan NB_UID=${NB_UID:-1100} NB_GID=${NB_GID:-1100} PATH=$PATH:/srv/conda/envs/notebook/bin/",
+        "ENV NB_USER=jovyan NB_UID=${NB_UID:-1100} NB_GID=${NB_GID:-1100}",
         "--no-run",
         "--push",
         "--image-name",
