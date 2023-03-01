@@ -399,6 +399,9 @@ class Registry(SingletonConfigurable):
         })
         async with session.post(
                 URL(f'{url}{name}/blobs/uploads?{params}', encoded=True),
+                skip_auto_headers={
+                    'Content-Type'
+                },
                 allow_redirects=False) as resp:
             await resp.read()
             if resp.status != 201:
