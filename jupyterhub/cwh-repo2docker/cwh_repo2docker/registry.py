@@ -245,8 +245,8 @@ class Registry(SingletonConfigurable):
                     self.log.debug('found initial course image: %s labels=%s digest=%s',
                                    image_name_ref, labels, config['digest'])
                     initial_course_image = {
-                        "repo": '-',
-                        "ref": '-',
+                        "repo": None,
+                        "ref": None,
                         "image_name": image_name_ref,
                         "display_name": 'initial',
                         "image_id": config['digest'],
