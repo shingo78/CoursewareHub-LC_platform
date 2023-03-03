@@ -27,10 +27,12 @@ async def _get_manifest(session: aiohttp.ClientSession, url, name, ref):
             f'{url}{name}/manifests/{ref}',
             headers=headers) as resp:
         manifest = await resp.json()
+        if resp.status == 404:
+            return None
         return {
             'name': name,
             'reference': ref,
-            'digest': resp.headers['Docker-Content-Digest'],
+            'digest': resp.headers.get('Docker-Content-Digest'),
             'data': manifest
         }
 
@@ -67,12 +69,6 @@ async def _get_repos(session: aiohttp.ClientSession, url):
         return await resp.json()
 
 
-async def _get_blob(session: aiohttp.ClientSession, url, repo, digest):
-    async with session.get(
-            f'{url}{repo}/blobs/{digest}') as resp:
-        return await resp.read()
-
-
 async def _get_config(session, url, repo, ref, manifest):
     config_digest = manifest['data']['config']['digest']
     config_blob = await _get_blob(
@@ -85,6 +81,12 @@ async def _get_config(session, url, repo, ref, manifest):
         'data': config,
         'digest': config_digest
     }
+
+
+async def _get_blob(session: aiohttp.ClientSession, url, repo, digest):
+    async with session.get(
+            f'{url}{repo}/blobs/{digest}') as resp:
+        return await resp.read()
 
 
 async def _delete_blob(session, url, repo, digest):
@@ -208,7 +210,9 @@ class Registry(SingletonConfigurable):
         return f'{host}/{name}'
 
     async def list_images(self):
-        async with aiohttp.ClientSession(auth=self._get_auth()) as session:
+        async with aiohttp.ClientSession(
+                auth=self._get_auth(),
+                raise_for_status=True) as session:
             url = self.get_registry_url()
             self.log.debug('registry host=%s, registry url=%s', self.host, url)
 
@@ -271,7 +275,8 @@ class Registry(SingletonConfigurable):
                         "initial_course_image": False,
                     })
                 else:
-                    self.log.debug('not course image: %s labels=%s', image_name_ref, labels)
+                    self.log.debug('not course image: %s labels=%s digest=%s', 
+                                   image_name_ref, labels, config['digest'])
 
             if initial_course_image:
                 images.append(initial_course_image)
@@ -284,7 +289,9 @@ class Registry(SingletonConfigurable):
             return images
 
     async def inspect_image(self, name, ref):
-        async with aiohttp.ClientSession(auth=self._get_auth()) as session:
+        async with aiohttp.ClientSession(
+                auth=self._get_auth(),
+                raise_for_status=True) as session:
             url = self.get_registry_url()
 
             manifest = await _get_manifest(session, url, name, ref)
@@ -292,10 +299,15 @@ class Registry(SingletonConfigurable):
             return await _get_config(session, url, name, ref, manifest)
 
     async def delete_image(self, name, ref):
-        async with aiohttp.ClientSession(auth=self._get_auth()) as session:
+        async with aiohttp.ClientSession(
+                auth=self._get_auth(),
+                raise_for_status=True) as session:
             url = self.get_registry_url()
 
             manifest = await _get_manifest(session, url, name, ref)
+            if manifest is None:
+                # image not found
+                return
             config = await _get_config(session, url, name, ref, manifest)
             manifest_digest = manifest['digest']
 
@@ -324,8 +336,7 @@ class Registry(SingletonConfigurable):
 
         tasks = []
         for name in repo_names:
-            tasks.append(asyncio.ensure_future(
-                _get_tags(session, url, name)))
+            tasks.append(asyncio.ensure_future(_get_tags(session, url, name)))
 
         taginfos = await asyncio.gather(*tasks)
         repos = []
@@ -362,10 +373,14 @@ class Registry(SingletonConfigurable):
             new_name, new_ref, name, ref)
 
     async def set_name_tag(self, new_name, new_tag, src_name, src_tag):
-        async with aiohttp.ClientSession(auth=self._get_auth()) as session:
+        async with aiohttp.ClientSession(
+                auth=self._get_auth(),
+                raise_for_status=True) as session:
             url = self.get_registry_url()
 
             manifest = await _get_manifest(session, url, src_name, src_tag)
+            if manifest is None:
+                raise RuntimeError(f"image not found: '{src_name}:{src_tag}'")
 
             tasks = []
             config_digest = manifest['data']['config']['digest']
