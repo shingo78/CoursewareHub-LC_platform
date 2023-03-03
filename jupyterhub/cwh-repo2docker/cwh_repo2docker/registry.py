@@ -377,10 +377,11 @@ class Registry(SingletonConfigurable):
                 tasks.append(asyncio.ensure_future(
                     self._mount_blob(session, url, new_name, digest, src_name)))
             mounted_blobs = await asyncio.gather(*tasks)
-            self.log.debug('mounted blobs: %s', str(mounted_blobs))
+            self.log.debug('mounted blobs: dest=%s from=%s, %s',
+                           new_name, src_name, str(mounted_blobs))
 
             if (any([x is None for x in mounted_blobs])):
-                raise RuntimeError('faillure to mount blob')
+                raise RuntimeError('failed to mount blobs')
 
             return await _put_manifest(
                 session,
@@ -406,6 +407,5 @@ class Registry(SingletonConfigurable):
             await resp.read()
             if resp.status != 201:
                 self.log.error('_mount_blob: unexpected response: %d', resp.status)
-                self.log.debug('_mount_blob: response header: %s', str(resp.headers))
 
         return await _head_blob(session, url, name, digest)
