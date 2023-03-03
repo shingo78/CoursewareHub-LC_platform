@@ -59,6 +59,7 @@ async def build_image(
         "jovyan",
         "--user-id",
         "1100",
+        # for using docker-stacks entrypoint script in buildpack image
         "--appendix",
         "ENV NB_USER=${NB_USER:-jovyan} NB_UID=${NB_UID:-1100} NB_GID=${NB_GID:-1100}",
         "--no-run",
