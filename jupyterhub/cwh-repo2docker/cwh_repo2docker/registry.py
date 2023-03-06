@@ -89,19 +89,23 @@ async def _get_blob(session: aiohttp.ClientSession, url, repo, digest):
         return await resp.read()
 
 
-async def _delete_blob(session, url, repo, digest):
+async def _delete_blob(session: aiohttp.ClientSession, url, repo, digest):
     async with session.delete(f'{url}{repo}/blobs/{digest}') as resp:
         await resp.read()
 
 
-async def _head_blob(session, url, repo, digest):
-    async with session.head(f'{url}{repo}/blobs/{digest}') as resp:
+async def _head_blob(session: aiohttp.ClientSession, url, repo, digest):
+    async with session.head(f'{url}{repo}/blobs/{digest}',
+                            raise_for_status=False) as resp:
         await resp.read()
         if resp.status == 200:
             return (
                 resp.headers['Content-Length'],
                 resp.headers['Docker-Content-Digest']
             )
+        if resp.status == 404:
+            return None
+        resp.raise_for_status()
         return None
 
 
