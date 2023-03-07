@@ -339,18 +339,6 @@ class Registry(SingletonConfigurable):
 
             return images
 
-    async def inspect_image(self, name: str, ref: str) -> Optional[Dict]:
-        async with aiohttp.ClientSession(
-                auth=self._get_auth(),
-                raise_for_status=True) as session:
-            url = self.get_registry_url()
-
-            manifest = await _get_manifest(session, url, name, ref)
-            if manifest is None:
-                return None
-
-            return await _get_config(session, url, name, ref, manifest)
-
     async def delete_image(self, name: str, ref: str) -> None:
         async with aiohttp.ClientSession(
                 auth=self._get_auth(),

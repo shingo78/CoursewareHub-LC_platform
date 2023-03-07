@@ -92,43 +92,13 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
         default_course_images = [i for i in images if i['default_course_image']]
         if not default_course_images:
             self._use_initial_course_image(images)
-            return
-        self.cmd = default_course_images[0]['config']['config']['Cmd']
 
     def _use_initial_course_image(self, images):
-
         self.image = self._registry.get_initial_course_image()
 
         initial_course_images = [i for i in images if i['initial_course_image']]
         if not initial_course_images:
             raise RuntimeError("Initial course image NOT found")
-        self.cmd = initial_course_images[0]['config']['config']['Cmd']
-
-    async def get_command(self):
-        """get command from registry instead of local image."""
-
-        self.log.debug("get_command: image=%s", self.image)
-
-        if self.cmd:
-            cmd = self.cmd
-        else:
-            parts = self.image.split('/', 1)
-            if len(parts) == 2:
-                host, image_name = parts
-            else:
-                host, image_name = ('', parts[0])
-
-            if host == self._registry.host:
-                name, ref = split_image_name(image_name)
-                config = await self._registry.inspect_image(name, ref)
-                cmd = config['data']['config']['Cmd']
-            else:
-                image_info = await self.docker("inspect_image", self.image)
-                cmd = image_info["Config"]["Cmd"]
-
-        self.log.debug("get_command: %s", str(cmd))
-
-        return cmd + self.get_args()
 
     async def create_object(self, *args, **kwargs):
         self.docker(
