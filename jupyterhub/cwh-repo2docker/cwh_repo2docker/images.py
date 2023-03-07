@@ -7,6 +7,7 @@ import json
 from .docker import list_containers
 from .registry import get_registry
 
+
 class ImagesHandler(BaseHandler):
     """
     Handler to show the list of environments as Docker images
