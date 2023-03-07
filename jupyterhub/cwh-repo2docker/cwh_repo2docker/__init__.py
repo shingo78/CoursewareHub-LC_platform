@@ -121,7 +121,7 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
         return cmd
 
     async def get_command(self):
-        image_cmd = self._get_cmd_from_image(self)
+        image_cmd = await self._get_cmd_from_image()
 
         if self.cmd:
             cmd = self.cmd
