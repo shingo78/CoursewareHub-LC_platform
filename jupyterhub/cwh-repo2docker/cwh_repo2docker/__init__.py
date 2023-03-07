@@ -104,29 +104,30 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
             raise RuntimeError("Initial course image NOT found")
         self.cmd = initial_course_images[0]['config']['config']['Cmd']
 
+    async def _get_cmd_from_image(self):
+        parts = self.image.split('/', 1)
+        if len(parts) == 2:
+            host, image_name = parts
+        else:
+            host, image_name = ('', parts[0])
+
+        if host == self._registry.host:
+            name, ref = split_image_name(image_name)
+            config = await self._registry.inspect_image(name, ref)
+            cmd = config['data']['config']['Cmd']
+        else:
+            image_info = await self.docker("inspect_image", self.image)
+            cmd = image_info["Config"]["Cmd"]
+        return cmd
+
     async def get_command(self):
-        """get command from registry instead of local image."""
-
-        self.log.debug("get_command: image=%s", self.image)
-
         if self.cmd:
             cmd = self.cmd
         else:
-            parts = self.image.split('/', 1)
-            if len(parts) == 2:
-                host, image_name = parts
-            else:
-                host, image_name = ('', parts[0])
-
-            if host == self._registry.host:
-                name, ref = split_image_name(image_name)
-                config = await self._registry.inspect_image(name, ref)
-                cmd = config['data']['config']['Cmd']
-            else:
-                image_info = await self.docker("inspect_image", self.image)
-                cmd = image_info["Config"]["Cmd"]
-
-        self.log.debug("get_command: %s", str(cmd))
+            image_cmd = self._get_cmd_from_image(self)
+            # override cmd for docker-stacks image
+            if image_cmd == ['start-notebook.sh']:
+                cmd = image_cmd
 
         return cmd + self.get_args()
 
