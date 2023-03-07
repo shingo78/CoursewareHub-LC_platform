@@ -31,7 +31,11 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
         {% for image in image_list %}
         <label for='image-item-{{ loop.index0 }}' class='form-control input-group'>
             <div class='col-md-1'>
+                {% if image.default_course_image %}
+                <input type='radio' name='image' id='image-item-{{ loop.index0 }}' value='{{ registry_host }}/{{ image.image_name }}' checked/>
+                {% else %}
                 <input type='radio' name='image' id='image-item-{{ loop.index0 }}' value='{{ registry_host }}/{{ image.image_name }}' />
+                {%- endif %}
             </div>
             <div class='col-md-11'>
                 <strong>{{ image.display_name }}</strong>
