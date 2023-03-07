@@ -121,13 +121,16 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
         return cmd
 
     async def get_command(self):
+        image_cmd = self._get_cmd_from_image(self)
+
         if self.cmd:
             cmd = self.cmd
         else:
-            image_cmd = self._get_cmd_from_image(self)
-            # override cmd for docker-stacks image
-            if image_cmd == ['start-notebook.sh']:
-                cmd = image_cmd
+            cmd = image_cmd
+
+        # override cmd for docker-stacks image
+        if image_cmd == ['start-notebook.sh']:
+            cmd = image_cmd
 
         return cmd + self.get_args()
 
