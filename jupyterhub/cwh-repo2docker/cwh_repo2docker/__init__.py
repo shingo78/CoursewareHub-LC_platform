@@ -1,4 +1,5 @@
 import os
+import sys
 
 from coursewareuserspawner import CoursewareUserSpawner
 from jinja2 import Environment, BaseLoader

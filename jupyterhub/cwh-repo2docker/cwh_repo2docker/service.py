@@ -63,7 +63,7 @@ class CwhRepo2DockerApplication(Application):
         service_prefix = os.environ['JUPYTERHUB_SERVICE_PREFIX']
 
         self.tornado_settins = {
-            'config': app.config,
+            'config': self.config,
             'base_url': base_url,
             'jinja2_env': jinja_env,
             'static_path': jupyterhub_static_path,
@@ -84,7 +84,7 @@ class CwhRepo2DockerApplication(Application):
                 (url_path_join(
                     service_prefix, r'api/environments/([^/]+)/logs'),
                     LogsHandler),
-                (url_path_join(sercice_prefix, r"static/(.*)"),
+                (url_path_join(service_prefix, r"static/(.*)"),
                     web.StaticFilesHandler,
                     {
                         "path": os.path.join(os.path.dirname(__file__), "static")

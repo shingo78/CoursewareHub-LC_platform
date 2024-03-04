@@ -27,10 +27,10 @@ class ImagesHandler(HubOAuthenticated, web.RequestHandler):
         self.write(await result)
 
     def render_template(self, name, **ns):
-        tempalte_ns = {}
+        template_ns = {}
         template_ns.update(self.template_namespace)
         template_ns.update(ns)
-        tempalte = self.settings['jinja2_env'].get_template(name)
+        template = self.settings['jinja2_env'].get_template(name)
         return template.render_async(**template_ns)
 
     @property
