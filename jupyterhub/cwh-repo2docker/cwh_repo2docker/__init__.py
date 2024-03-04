@@ -228,6 +228,7 @@ def cwh_repo2docker_jupyterhub_config(c, config_file=None):
         "command": service_command,
         "url": "http://127.0.0.1:10101",
         "oauth_no_confirm": True,
-        "admin": True,
-        "environment": environments
+        # "admin": True,
+        "environment": environments,
+	"oauth_client_allowed_scopes": ["inherit"]
     }])
