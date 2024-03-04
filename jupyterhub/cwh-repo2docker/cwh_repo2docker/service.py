@@ -88,7 +88,7 @@ class CwhRepo2DockerApplication(Application):
                     service_prefix, r'api/environments/([^/]+)/logs'),
                     LogsHandler),
                 (url_path_join(service_prefix, r"static/(.*)"),
-                    web.StaticFilesHandler,
+                    web.StaticFileHandler,
                     {
                         "path": os.path.join(os.path.dirname(__file__), "static")
                     }
