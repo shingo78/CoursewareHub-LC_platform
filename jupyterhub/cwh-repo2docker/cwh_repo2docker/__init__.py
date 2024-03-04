@@ -162,9 +162,9 @@ def cwh_repo2docker_jupyterhub_config(c, config_file=None):
     c.JupyterHub.spawner_class = Repo2DockerSpawner
 
     # add extra templates for the service UI
-    c.JupyterHub.template_paths.insert(
-        0, os.path.join(os.path.dirname(__file__), "templates")
-    )
+    #c.JupyterHub.template_paths.insert(
+    #    0, os.path.join(os.path.dirname(__file__), "templates")
+    #)
 
     c.DockerSpawner.cmd = ["jupyterhub-singleuser"]
 
