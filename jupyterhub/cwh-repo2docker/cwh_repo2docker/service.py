@@ -97,7 +97,7 @@ class CwhRepo2DockerApplication(Application):
                     }
                  )
             ],
-            self.tornado_settings,
+            **self.tornado_settings,
             cookie_secret=os.urandom(32),
         )
 
