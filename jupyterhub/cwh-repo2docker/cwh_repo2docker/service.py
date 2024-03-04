@@ -75,6 +75,10 @@ class CwhRepo2DockerApplication(Application):
             'static_path': jupyterhub_static_path,
             'static_url_prefix': url_path_join(base_url, 'static/'),
             'service_prefix': service_prefix,
+            'xsrf_cookies': True,
+            'xsrf_cookie_kwargs': {
+	        url_path_join(base_url, service_prefix)
+	    }
         }
 
         self.tornado_application = web.Application(
