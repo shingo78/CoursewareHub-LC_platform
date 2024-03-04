@@ -5,6 +5,7 @@ from coursewareuserspawner import CoursewareUserSpawner
 from jinja2 import Environment, BaseLoader
 from jupyterhub.handlers.static import CacheControlStaticFilesHandler
 from traitlets import Unicode
+from tornado import web
 
 from .builder import BuildHandler, DefaultCourseImageHandler
 from .registry import get_registry, split_image_name
@@ -102,6 +103,19 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
             self.image_form_template
         )
         return image_form_template.render(image_list=images, registry_host=self._registry.host)
+
+    async def check_allowed(self, image):
+        images = await self._registry.list_images()
+
+        registry_host = self._registry.host
+        image_names = [
+	    f'{registry_host}/{image_name}'
+            for image_name in images
+	]
+
+        if image not in image_names:
+            raise web.HTTPError(400, "Specifying image to launch is not allowed")
+        return image
 
     def _use_default_course_image(self, images):
         self.image = self._registry.get_default_course_image()
