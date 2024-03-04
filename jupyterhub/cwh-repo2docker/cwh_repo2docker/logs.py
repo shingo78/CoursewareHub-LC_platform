@@ -7,8 +7,10 @@ from jupyterhub.utils import admin_only
 from tornado import web
 from tornado.iostream import StreamClosedError
 
+from .service import BaseHandler
 
-class LogsHandler(HubOAuthenticated, web.RequestHandler):
+
+class LogsHandler(HubOAuthenticated, BaseHandler):
     """
     Expose a handler to follow the build logs.
     """

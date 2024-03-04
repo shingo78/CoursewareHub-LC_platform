@@ -9,11 +9,12 @@ from tornado import web
 
 from .docker import build_image
 from .registry import get_registry, split_image_name
+from .service import BaseHandler
 
 IMAGE_NAME_RE = r"^[a-z0-9-_]+$"
 
 
-class BuildHandler(HubOAuthenticated, web.RequestHandler):
+class BuildHandler(HubOAuthenticated, BaseHandler):
     """
     Handle requests to build user environments as Docker images
     """
@@ -80,7 +81,7 @@ class BuildHandler(HubOAuthenticated, web.RequestHandler):
         self.finish(json.dumps({"status": "ok"}))
 
 
-class DefaultCourseImageHandler(HubOAuthenticated, web.RequestHandler):
+class DefaultCourseImageHandler(HubOAuthenticated, BaseHandler):
     """
     Handler to update the default course image
     """

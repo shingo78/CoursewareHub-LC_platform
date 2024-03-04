@@ -1,15 +1,16 @@
 from inspect import isawaitable
-from jupyterhub.handlers.base import BaseHandler
 from jupyterhub.services.auth import HubOAuthenticated
 from jupyterhub.scopes import needs_scope
 from tornado import web
+from tornado.log import app_log
 import json
 
 from .docker import list_containers
 from .registry import get_registry
+from .service import BaseHandler
 
 
-class ImagesHandler(HubOAuthenticated, web.RequestHandler):
+class ImagesHandler(HubOAuthenticated, BaseHandler):
     """
     Handler to show the list of environments as Docker images
     """
@@ -17,7 +18,7 @@ class ImagesHandler(HubOAuthenticated, web.RequestHandler):
     @web.authenticated
     #@needs_scope('admin-ui')
     async def get(self):
-        self.log.debug("tornado settings=%s", self.settings)
+        app_log.debug("tornado settings=%s", self.settings)
         registry = get_registry(config=self.settings['config'])
         images = await registry.list_images()
         containers = await list_containers()
