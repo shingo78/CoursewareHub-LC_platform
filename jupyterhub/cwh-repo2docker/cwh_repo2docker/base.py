@@ -21,6 +21,7 @@ class BaseHandler(web.RequestHandler):
         ns = dict(
             base_url=self.settings['base_url'],
             prefix=self.settings['base_url'],
+            service_prefix=self.settings['service_prefix'],
             user=user,
             #login_url=self.settings['login_url'],
             #login_service=self.authenticator.login_service,
