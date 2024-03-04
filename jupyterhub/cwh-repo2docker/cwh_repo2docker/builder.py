@@ -80,7 +80,7 @@ class BuildHandler(HubOAuthenticated, web.RequestHandler):
         self.finish(json.dumps({"status": "ok"}))
 
 
-class DefaultCouseImageHandler(HubOAuthenticated, web.RequestHandler):
+class DefaultCourseImageHandler(HubOAuthenticated, web.RequestHandler):
     """
     Handler to update the default course image
     """

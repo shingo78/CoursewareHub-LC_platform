@@ -6,7 +6,7 @@ from jinja2 import Environment, BaseLoader
 from jupyterhub.handlers.static import CacheControlStaticFilesHandler
 from traitlets import Unicode
 
-from .builder import BuildHandler, DefaultCouseImageHandler
+from .builder import BuildHandler, DefaultCourseImageHandler
 from .registry import get_registry, split_image_name
 from .images import ImagesHandler
 from .logs import LogsHandler
@@ -173,7 +173,7 @@ def cwh_repo2docker_jupyterhub_config(c, config_file=None):
     #    [
     #        (r"environments", ImagesHandler),
     #        (r"api/environments", BuildHandler),
-    #        (r"api/environments/default-course-image", DefaultCouseImageHandler),
+    #        (r"api/environments/default-course-image", DefaultCourseImageHandler),
     #        (r"api/environments/([^/]+)/logs", LogsHandler),
     #        (
     #            r"environments-static/(.*)",

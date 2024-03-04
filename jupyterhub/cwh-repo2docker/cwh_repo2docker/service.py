@@ -16,10 +16,10 @@ from jupyterhub._data import DATA_FILES_PATH
 
 from jinja2 import ChoiceLoader, Environment, FileSystemLoader, PrefixLoader
 
-from ..builder import BuildHandler, DefaultCouseImageHandler
-from ..registry import get_registry, split_image_name
-from ..images import ImagesHandler
-from ..logs import LogsHandler
+from .builder import BuildHandler, DefaultCourseImageHandler
+from .registry import get_registry, split_image_name
+from .images import ImagesHandler
+from .logs import LogsHandler
 
 
 class CwhRepo2DockerApplication(Application):
@@ -80,7 +80,7 @@ class CwhRepo2DockerApplication(Application):
                     BuildHandler),
                 (url_path_join(
                     service_prefix, 'api/environments/default-course-image'),
-                    DefaultCouseImageHandler),
+                    DefaultCourseImageHandler),
                 (url_path_join(
                     service_prefix, r'api/environments/([^/]+)/logs'),
                     LogsHandler),
