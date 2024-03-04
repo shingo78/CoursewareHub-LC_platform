@@ -98,7 +98,7 @@ class CwhRepo2DockerApplication(Application):
             cookie_secret=os.urandom(32),
         )
 
-        self.http_server = HTTPServer(self.tornade_application)
+        self.http_server = HTTPServer(self.tornado_application)
 
         url = urlparse(os.environ['JUPYTERHUB_SERVICE_URL'])
         self.http_server.listen(url.port, url.hostname)
