@@ -109,7 +109,7 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
 
         registry_host = self._registry.host
         image_names = [
-	    f'{registry_host}/{image["image_name"]}'
+            f'{registry_host}/{image["image_name"]}'
             for image in images
 	]
 

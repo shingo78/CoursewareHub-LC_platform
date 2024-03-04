@@ -17,6 +17,7 @@ class ImagesHandler(HubOAuthenticated, web.RequestHandler):
     @web.authenticated
     #@needs_scope('admin-ui')
     async def get(self):
+        self.log.debug("tornado settings=%s": self.settings)
         registry = get_registry(config=self.settings['config'])
         images = await registry.list_images()
         containers = await list_containers()
@@ -37,8 +38,8 @@ class ImagesHandler(HubOAuthenticated, web.RequestHandler):
     def template_namespace(self):
         user = self.current_user
         ns = dict(
-            base_url=self.hub.base_url,
-            prefix=self.base_url,
+            base_url=self.settings['base_url']
+            prefix=self.settings['base_url']
             user=user,
             #login_url=self.settings['login_url'],
             #login_service=self.authenticator.login_service,
