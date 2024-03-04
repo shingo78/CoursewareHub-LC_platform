@@ -29,6 +29,9 @@ class CwhRepo2DockerApplication(Application):
         help="The config file to load").tag(
         config=True
     )
+    aliases = {
+        "config-file": "CwhRepo2DockerApplication.config_file"
+    }
 
     @catch_config_error
     async def initialize(self, *args, **kwargs):
