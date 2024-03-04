@@ -207,10 +207,23 @@ def cwh_repo2docker_jupyterhub_config(c, config_file=None):
             "--config-file", config_file
         ])
 
+    environ_names = [
+        'CONTAINER_IMAGE',
+        'REGISTRY_HOST',
+        'REGISTRY_USER',
+        'REGISTRY_PASSWORD'
+    ]
+
+    environments = {}
+    for name in environ_names:
+        if name in os.environ:
+            environments[name] = os.environ[name]
+
     c.JupyterHub.services.extend([{
         "name": "environments",
         "command": service_command,
         "url": "http://127.0.0.1:10101",
         "oauth_no_confirm": True,
         "admin": True,
+        "environment": environments
     }])
