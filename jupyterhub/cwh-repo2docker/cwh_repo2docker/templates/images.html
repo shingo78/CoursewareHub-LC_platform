@@ -2,8 +2,8 @@
 
 {% block stylesheet %}
 {{ super() }}
-<link rel="stylesheet" href="{{ base_url }}environments-static/css/style.css" type="text/css"/>
-<link rel="stylesheet" href="{{ base_url }}environments-static/vendor/xterm.css" type="text/css"/>
+<link rel="stylesheet" href="{{ base_url }}{{ service_prefix }}/static/css/style.css" type="text/css"/>
+<link rel="stylesheet" href="{{ base_url }}{{ service_prefix }}/static/vendor/xterm.css" type="text/css"/>
 {% endblock %}
 
 {% block main %}

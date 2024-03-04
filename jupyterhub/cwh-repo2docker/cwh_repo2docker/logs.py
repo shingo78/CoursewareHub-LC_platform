@@ -2,12 +2,13 @@ import json
 
 from aiodocker import Docker
 from jupyterhub.apihandlers import APIHandler
+from jupyterhub.services.auth import HubOAuthenticated
 from jupyterhub.utils import admin_only
 from tornado import web
 from tornado.iostream import StreamClosedError
 
 
-class LogsHandler(APIHandler):
+class LogsHandler(HubOAuthenticated, web.RequestHandler):
     """
     Expose a handler to follow the build logs.
     """

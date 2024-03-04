@@ -1,8 +1,32 @@
 {% extends "templates/page.html" %}
 
+{% block nav_bar %}
+  <nav class="navbar navbar-default">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        {% block logo %}
+        {{ super() }}
+        {% endblock %}
+      </div>
+    </div>
+  </nav>
+{% endblock %}
+{% endblock %}
+
+{% block announcement %}
+{% endblock %}
+
 {% block nav_bar_left_items %}
 {{ super() }}
 {% if 'admin-ui' in parsed_scopes %}
-<li><a href="{{base_url}}environments">Environments</a></li>
+<li><a href="{{base_url}}/services/environments">Environments</a></li>
+{% endif %}
+{% endblock %}
+
+{% block nav_bar_left_items %}
+            <li><a href="{{base_url}}home">Home</a></li>
+            <li><a href="{{base_url}}token">Token</a></li>
+{% if 'admin-ui' in parsed_scopes %}
+<li><a href="{{base_url}}/services/environments">Environments</a></li>
 {% endif %}
 {% endblock %}

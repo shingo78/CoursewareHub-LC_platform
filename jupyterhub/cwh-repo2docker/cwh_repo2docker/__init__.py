@@ -156,7 +156,7 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
         return await super().create_object(*args, **kwargs)
 
 
-def cwh_repo2docker_jupyterhub_config(c):
+def cwh_repo2docker_jupyterhub_config(c, config_file=None):
     # hub
     c.JupyterHub.spawner_class = Repo2DockerSpawner
 
@@ -168,16 +168,34 @@ def cwh_repo2docker_jupyterhub_config(c):
     c.DockerSpawner.cmd = ["jupyterhub-singleuser"]
 
     # register the handlers to manage the user images
-    c.JupyterHub.extra_handlers.extend(
-        [
-            (r"environments", ImagesHandler),
-            (r"api/environments", BuildHandler),
-            (r"api/environments/default-course-image", DefaultCouseImageHandler),
-            (r"api/environments/([^/]+)/logs", LogsHandler),
-            (
-                r"environments-static/(.*)",
-                CacheControlStaticFilesHandler,
-                {"path": os.path.join(os.path.dirname(__file__), "static")},
-            ),
-        ]
-    )
+    #c.JupyterHub.extra_handlers.extend(
+    #    [
+    #        (r"environments", ImagesHandler),
+    #        (r"api/environments", BuildHandler),
+    #        (r"api/environments/default-course-image", DefaultCouseImageHandler),
+    #        (r"api/environments/([^/]+)/logs", LogsHandler),
+    #        (
+    #            r"environments-static/(.*)",
+    #            CacheControlStaticFilesHandler,
+    #            {"path": os.path.join(os.path.dirname(__file__), "static")},
+    #        ),
+    #    ]
+    #)
+
+    service_command = [
+        sys.executable,
+        "-m", "cwh_repo2docker.service",
+    ]
+
+    if config_file is not None:
+        service_command.extend([
+            "--config-file", config_file
+        ])
+
+    c.JupyterHub.services.extend([{
+        "name": "environments",
+        "command": service_command,
+        "url": "http://127.0.0.1:10101",
+        "oauth_no_confirm": True,
+        "admin": True,
+    }])
