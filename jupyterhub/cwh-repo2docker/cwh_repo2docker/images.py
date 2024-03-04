@@ -17,7 +17,7 @@ class ImagesHandler(HubOAuthenticated, web.RequestHandler):
     @web.authenticated
     #@needs_scope('admin-ui')
     async def get(self):
-        self.log.debug("tornado settings=%s": self.settings)
+        self.log.debug("tornado settings=%s", self.settings)
         registry = get_registry(config=self.settings['config'])
         images = await registry.list_images()
         containers = await list_containers()
