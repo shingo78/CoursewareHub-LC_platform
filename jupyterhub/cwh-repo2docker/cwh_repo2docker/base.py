@@ -10,6 +10,7 @@ class BaseHandler(web.RequestHandler):
     def render_template(self, name, **ns):
         template_ns = {}
         template_ns.update(self.template_namespace)
+        template_ns["xsrf_token"] = self.xsrf_token.decode("ascii")
         template_ns.update(ns)
         template = self.settings['jinja2_env'].get_template(name)
         return template.render_async(**template_ns)
@@ -27,6 +28,7 @@ class BaseHandler(web.RequestHandler):
             static_url=self.static_url,
             #version_hash=self.version_hash,
             #services=self.get_accessible_services(user),
+            no_spawner_check=True
         )
         return ns
 
