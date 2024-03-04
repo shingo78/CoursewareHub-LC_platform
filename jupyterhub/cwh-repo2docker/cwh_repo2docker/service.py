@@ -30,10 +30,6 @@ class CwhRepo2DockerApplication(Application):
         config=True
     )
 
-    flags = {
-        "config-file": ({"CwhRepo2DockerApplication" : {"config_file": True}}, config_file.help)
-    }
-
     @catch_config_error
     async def initialize(self, *args, **kwargs):
         super().initialize(*args, **kwargs)
