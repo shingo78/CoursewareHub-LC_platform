@@ -9,7 +9,7 @@ from tornado import web
 
 from .docker import build_image
 from .registry import get_registry, split_image_name
-from .service import BaseHandler
+from .base import BaseHandler
 
 IMAGE_NAME_RE = r"^[a-z0-9-_]+$"
 

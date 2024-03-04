@@ -7,7 +7,7 @@ from jupyterhub.utils import admin_only
 from tornado import web
 from tornado.iostream import StreamClosedError
 
-from .service import BaseHandler
+from .base import BaseHandler
 
 
 class LogsHandler(HubOAuthenticated, BaseHandler):

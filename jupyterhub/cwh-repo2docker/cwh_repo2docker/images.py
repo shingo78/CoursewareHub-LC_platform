@@ -7,7 +7,7 @@ import json
 
 from .docker import list_containers
 from .registry import get_registry
-from .service import BaseHandler
+from .base import BaseHandler
 
 
 class ImagesHandler(HubOAuthenticated, BaseHandler):
