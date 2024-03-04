@@ -65,7 +65,7 @@ class CwhRepo2DockerApplication(Application):
 
         service_prefix = os.environ['JUPYTERHUB_SERVICE_PREFIX']
 
-        self.tornado_settins = {
+        self.tornado_settings = {
             'config': self.config,
             'base_url': base_url,
             'jinja2_env': jinja_env,
