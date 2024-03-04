@@ -38,7 +38,7 @@ class BuildHandler(HubOAuthenticated, web.RequestHandler):
                 raise web.HTTPError(500, e.message)
 
         self.set_status(200)
-	self.set_header('content-type', 'application/json')
+        self.set_header('content-type', 'application/json')
         self.finish(json.dumps({"status": "ok"}))
 
     @web.authenticated
@@ -76,7 +76,7 @@ class BuildHandler(HubOAuthenticated, web.RequestHandler):
         await build_image(registry.host, repo, ref, name, username, password, extra_buildargs)
 
         self.set_status(200)
-	self.set_header('content-type', 'application/json')
+        self.set_header('content-type', 'application/json')
         self.finish(json.dumps({"status": "ok"}))
 
 
@@ -98,5 +98,5 @@ class DefaultCouseImageHandler(HubOAuthenticated, web.RequestHandler):
         await registry.set_default_course_image(repo, digest)
 
         self.set_status(200)
-	self.set_header('content-type', 'application/json')
+        self.set_header('content-type', 'application/json')
         self.finish(json.dumps({"status": "ok"}))

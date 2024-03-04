@@ -39,11 +39,11 @@ class CwhRepo2DockerApplication(Application):
     async def start(self):
         self.io_loop = loop = IOLoop.current()
 
-	base_url = os.environ['JUPYTERHUB_BASE_URL']
+        base_url = os.environ['JUPYTERHUB_BASE_URL']
 
-	jupyterhub_template_path = os.path.join(DATA_FILES_PATH, 'templates')
+        jupyterhub_template_path = os.path.join(DATA_FILES_PATH, 'templates')
         template_path = os.path.join(os.path.dirname(__file__), "templates")
-	jupyterhub_static_path = os.path.join(DATA_FILES_PATH, 'static')
+        jupyterhub_static_path = os.path.join(DATA_FILES_PATH, 'static')
         static_path = os.path.join(os.path.dirname(__file__), "static")
 
         template_paths = [
@@ -51,7 +51,7 @@ class CwhRepo2DockerApplication(Application):
             template_path
         ]
 
-	jinja_options = dict(autoescape=True, enable_async=True)
+        jinja_options = dict(autoescape=True, enable_async=True)
         loader = ChoiceLoader(
             [
                 PrefixLoader({'templates': FileSystemLoader([jupyterhub_template_path])}, '/'),
@@ -65,10 +65,10 @@ class CwhRepo2DockerApplication(Application):
         self.tornado_settins = {
             'config': app.config,
             'base_url': base_url,
-	    'jinja2_env': jinja_env,
-	    'static_path': jupyterhub_static_path,
-	    'static_url_prefix': url_path_join(base_url, 'static/'),
-	    'service_prefix': service_prefix,
+            'jinja2_env': jinja_env,
+            'static_path': jupyterhub_static_path,
+            'static_url_prefix': url_path_join(base_url, 'static/'),
+            'service_prefix': service_prefix,
         }
 
         self.tornado_application = web.Application(
