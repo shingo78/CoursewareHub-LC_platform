@@ -113,6 +113,10 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
             for image_name in images
 	]
 
+        self.log.debug(
+            "check_allowed: allowed_images=%s specifying image=%s",
+	    image_names, image)
+
         if image not in image_names:
             raise web.HTTPError(400, "Specifying image to launch is not allowed")
         return image
