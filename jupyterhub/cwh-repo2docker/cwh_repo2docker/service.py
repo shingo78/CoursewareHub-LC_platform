@@ -50,6 +50,10 @@ class CwhRepo2DockerApplication(Application):
         self.io_loop = loop = IOLoop.current()
 
         base_url = os.environ['JUPYTERHUB_BASE_URL']
+        service_prefix = os.environ['JUPYTERHUB_SERVICE_PREFIX']
+        oauth_callback_url = os.environ.get(
+            'JUPYTERHUB_OAUTH_CALLBACK_URL',
+            url_path_join(service_prefix, 'oauth_callback'))
 
         jupyterhub_template_path = os.path.join(DATA_FILES_PATH, 'templates')
         template_path = os.path.join(os.path.dirname(__file__), "templates")
@@ -70,8 +74,6 @@ class CwhRepo2DockerApplication(Application):
         )
         jinja_env = Environment(loader=loader, **jinja_options)
 
-        service_prefix = os.environ['JUPYTERHUB_SERVICE_PREFIX']
-
         self.tornado_settings = {
             'config': self.config,
             'app': self,
@@ -84,15 +86,15 @@ class CwhRepo2DockerApplication(Application):
             'hub_prefix': self.hub_prefix,
             'xsrf_cookies': True,
             'xsrf_cookie_kwargs': {
-	        url_path_join(base_url, service_prefix)
-	    }
+                url_path_join(base_url, service_prefix)
+            },
+            'cookie_secret': os.urandom(32),
         }
 
         self.tornado_application = web.Application(
             [
                 (service_prefix, ImagesHandler),
-                (url_path_join(service_prefix, 'oauth_callback'),
-                    HubOAuthCallbackHandler),
+                (oauth_callback_url, HubOAuthCallbackHandler),
                 (url_path_join(service_prefix, 'api/environments'),
                     BuildHandler),
                 (url_path_join(
@@ -108,8 +110,7 @@ class CwhRepo2DockerApplication(Application):
                     }
                  )
             ],
-            **self.tornado_settings,
-            cookie_secret=os.urandom(32),
+            **self.tornado_settings
         )
 
         self.http_server = HTTPServer(self.tornado_application)
