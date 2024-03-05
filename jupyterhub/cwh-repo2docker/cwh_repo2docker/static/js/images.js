@@ -14,7 +14,7 @@ require([
   "use strict";
 
   var base_url = window.jhdata.base_url;
-  var xsrf_token = window.jhdata.xsrf_token;
+  var xsrf_token = window.jhdata.xsrf_token || window.xsrf_token;
   var api = new JHAPI(base_url);
 
   function getRow(element) {

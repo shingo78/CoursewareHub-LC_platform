@@ -164,6 +164,7 @@
 {% block script %}
 {{ super() }}
 <script type="text/javascript">
+window.xsrf_token = "{{ xsrf_token }}";
 require(["static/js/images.js"]);
 </script>
 {% endblock %}
