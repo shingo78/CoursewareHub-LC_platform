@@ -18,7 +18,7 @@ class ImagesHandler(HubOAuthenticated, BaseHandler):
     @web.authenticated
     #@needs_scope('admin-ui')
     async def get(self):
-	self.log.debug("current_user:%s", self.current_user)
+        self.log.debug("current_user:%s", self.current_user)
         registry = get_registry(config=self.settings['config'])
         images = await registry.list_images()
         containers = await list_containers()
