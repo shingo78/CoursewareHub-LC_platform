@@ -2,8 +2,8 @@
 
 {% block stylesheet %}
 {{ super() }}
-<link rel="stylesheet" href="{{ base_url }}{{ service_prefix }}/static/css/style.css" type="text/css"/>
-<link rel="stylesheet" href="{{ base_url }}{{ service_prefix }}/static/vendor/xterm.css" type="text/css"/>
+<link rel="stylesheet" href="static/css/style.css" type="text/css"/>
+<link rel="stylesheet" href="static/vendor/xterm.css" type="text/css"/>
 {% endblock %}
 
 {% block main %}
@@ -164,6 +164,6 @@
 {% block script %}
 {{ super() }}
 <script type="text/javascript">
-require(["{{ base_url }}{{ service_prefix }}environments/static/js/images.js"]);
+require(["static/js/images.js"]);
 </script>
 {% endblock %}
