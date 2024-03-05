@@ -1,6 +1,8 @@
 from tornado import web
 from tornado.log import app_log
 
+from jupyterhub.utils import url_path_join
+
 
 class BaseHandler(web.RequestHandler):
     @property
@@ -19,7 +21,9 @@ class BaseHandler(web.RequestHandler):
     def template_namespace(self):
         user = self.current_user
         ns = dict(
-            base_url=self.settings['base_url'],
+            base_url=url_path_join(
+                self.settings['base_url'],
+                self.settings['hub_prefix']),
             prefix=self.settings['base_url'],
             service_prefix=self.settings['service_prefix'],
             user=user,

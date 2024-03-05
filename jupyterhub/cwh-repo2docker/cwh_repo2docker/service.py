@@ -7,12 +7,16 @@ from tornado.log import app_log
 from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop
 
-from traitlets import Unicode
+from traitlets import (
+    Unicode,
+    default
+)
 from traitlets.config import Application, catch_config_error
 
 from jupyterhub.services.auth import HubOAuthCallbackHandler, HubOAuthenticated
 from jupyterhub.utils import url_path_join
 from jupyterhub.handlers.static import CacheControlStaticFilesHandler
+from jupyterhub.traitlets import URLPrefix
 from jupyterhub._data import DATA_FILES_PATH
 
 from jinja2 import ChoiceLoader, Environment, FileSystemLoader, PrefixLoader
@@ -33,6 +37,8 @@ class CwhRepo2DockerApplication(Application):
     aliases = {
         "config-file": "CwhRepo2DockerApplication.config_file"
     }
+
+    hub_prefix = URLPrefix('/hub/')
 
     @catch_config_error
     async def initialize(self, *args, **kwargs):
@@ -75,6 +81,7 @@ class CwhRepo2DockerApplication(Application):
             'static_path': jupyterhub_static_path,
             'static_url_prefix': url_path_join(base_url, 'static/'),
             'service_prefix': service_prefix,
+            'hub_prefix': self.hub_prefix,
             'xsrf_cookies': True,
             'xsrf_cookie_kwargs': {
 	        url_path_join(base_url, service_prefix)
