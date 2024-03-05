@@ -175,7 +175,11 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
         return await super().create_object(*args, **kwargs)
 
 
-def cwh_repo2docker_jupyterhub_config(c, config_file=None):
+def cwh_repo2docker_jupyterhub_config(
+        c,
+        config_file=None,
+        service_name='environments',
+        custom_menu=False):
     # hub
     c.JupyterHub.spawner_class = Repo2DockerSpawner
 
@@ -200,6 +204,10 @@ def cwh_repo2docker_jupyterhub_config(c, config_file=None):
     #        ),
     #    ]
     #)
+    if custom_menu:
+        c.JupyterHub.template_paths.insert(
+            0, os.path.join(os.path.dirname(__file__), "custom_templates")
+        )
 
     service_command = [
         sys.executable,
@@ -223,12 +231,16 @@ def cwh_repo2docker_jupyterhub_config(c, config_file=None):
         if name in os.environ:
             environments[name] = os.environ[name]
 
+    c.JupyterHub.template_vars.update({
+        'cwh_repo2docker_service_name': service_name
+    })
+
     c.JupyterHub.services.extend([{
-        "name": "environments",
+        "name": service_name,
         "command": service_command,
         "url": "http://127.0.0.1:10101",
+        "display": not custom_menu,
         "oauth_no_confirm": True,
-        # "admin": True,
         "environment": environments,
 	"oauth_client_allowed_scopes": ["inherit"]
     }])
