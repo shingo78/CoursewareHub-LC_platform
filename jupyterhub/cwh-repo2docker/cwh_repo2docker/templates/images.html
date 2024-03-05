@@ -164,6 +164,6 @@
 {% block script %}
 {{ super() }}
 <script type="text/javascript">
-require(["{{ base_url }}environments-static/js/images.js"]);
+require(["{{ base_url }}{{ service_prefix }}environments/static/js/images.js"]);
 </script>
 {% endblock %}

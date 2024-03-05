@@ -1,7 +1,7 @@
 require([
   "jquery", "bootstrap", "moment", "jhapi", "utils",
-  "services/environments/static/vendor/xterm-addon-fit.js",
-  "services/environments/static/vendor/xterm.js"
+  "static/vendor/xterm-addon-fit.js",
+  "static/vendor/xterm.js"
 ], function(
   $,
   bs,
@@ -47,7 +47,7 @@ require([
     var row = getRow(el);
     var name = row.data('image');
     var digest = row.data('manifest-digest');
-    $.ajax(utils.url_path_join("services/environments/api/environments/default-course-image"), {
+    $.ajax(utils.url_path_join("api/environments/default-course-image"), {
       type: "PUT",
       data: JSON.stringify({
         name: name,
@@ -72,7 +72,7 @@ require([
       var spinner = $("#adding-environment-dialog");
       spinner.find('.modal-footer').remove();
       spinner.modal();
-      $.ajax(utils.url_path_join("services/environments/api/environments", {
+      $.ajax(utils.url_path_join("api/environments", {
         type: "POST",
         data: JSON.stringify({
           repo: repo,
@@ -140,7 +140,7 @@ require([
       log.open(container);
       fitAddon.fit();
 
-      var logsUrl = utils.url_path_join(base_url, "services", "environments", "api", "environments", image, "logs");
+      var logsUrl = utils.url_path_join("api", "environments", image, "logs");
       eventSource = new EventSource(logsUrl);
       eventSource.onerror = function(err) {
         console.error("Failed to construct event stream", err);
