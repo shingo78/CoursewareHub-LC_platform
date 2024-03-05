@@ -2,7 +2,7 @@
 
 {% block nav_bar_left_items %}
 {{ super() }}
-{% if 'access:services!service={{cwh_repo2docker_service_name}}' in parsed_scopes %}
+{% if 'access:services!service={{cwh_repo2docker_service_name}}' in expanded_scopes %}
 <li><a href="{{base_url}}services/{{cwh_repo2docker_service_name}}">Environments</a></li>
 {% endif %}
 {% endblock %}
