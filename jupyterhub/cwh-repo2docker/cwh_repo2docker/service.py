@@ -86,7 +86,7 @@ class CwhRepo2DockerApplication(Application):
             'hub_prefix': self.hub_prefix,
             'xsrf_cookies': True,
             'xsrf_cookie_kwargs': {
-                url_path_join(base_url, service_prefix)
+                'path': url_path_join(base_url, service_prefix)
             },
             'cookie_secret': os.urandom(32),
         }
