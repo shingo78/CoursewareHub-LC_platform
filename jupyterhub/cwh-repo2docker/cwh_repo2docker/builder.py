@@ -53,6 +53,8 @@ class BuildHandler(HubOAuthenticated, BaseHandler):
         username = data.get("username", None)
         password = data.get("password", None)
 
+        self.log.debug('Build request: data=%s', data)
+
         if not repo:
             raise web.HTTPError(400, "Repository is empty")
 
