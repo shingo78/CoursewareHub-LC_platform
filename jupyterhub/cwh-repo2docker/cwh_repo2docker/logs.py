@@ -15,7 +15,7 @@ class LogsHandler(HubOAuthenticated, BaseHandler):
     Expose a handler to follow the build logs.
     """
     @web.authenticated
-    @admin_only
+    #@admin_only
     async def get(self, name):
         self.set_header("Content-Type", "text/event-stream")
         self.set_header("Cache-Control", "no-cache")
