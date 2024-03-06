@@ -61,8 +61,8 @@ class CwhRepo2DockerApplication(Application):
         static_path = os.path.join(os.path.dirname(__file__), "static")
 
         template_paths = [
+            template_path,
             jupyterhub_template_path,
-            template_path
         ]
 
         jinja_options = dict(autoescape=True, enable_async=True)
