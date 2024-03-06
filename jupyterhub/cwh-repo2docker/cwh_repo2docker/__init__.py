@@ -179,7 +179,8 @@ def cwh_repo2docker_jupyterhub_config(
         c,
         config_file=None,
         service_name='environments',
-        custom_menu=False):
+        custom_menu=False
+        debug=False):
     # hub
     c.JupyterHub.spawner_class = Repo2DockerSpawner
 
@@ -218,6 +219,11 @@ def cwh_repo2docker_jupyterhub_config(
         service_command.extend([
             "--config-file", config_file
         ])
+
+    if debug:
+        service_command.extend([
+            "--debug"
+	])
 
     environ_names = [
         'CONTAINER_IMAGE',
