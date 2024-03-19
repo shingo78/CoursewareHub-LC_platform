@@ -25,12 +25,6 @@ c.DockerSpawner.host_ip = "0.0.0.0"
 c.DockerSpawner.image = f'{registry_host}/{initial_image}'
 c.DockerSpawner.network_name = os.environ['BACKEND_NETWORK']
 
-#c.Registry.initial_course_image = initial_image
-#c.Registry.default_course_image = os.environ.get('CONTAINER_IMAGE', 'coursewarehub/default-course-image:latest')
-#c.Registry.host = registry_host
-#c.Registry.username = os.environ.get('REGISTRY_USER', 'cwh')
-#c.Registry.password = os.environ['REGISTRY_PASSWORD']
-
 class CoursewareHubLogoutHandler(LogoutHandler):
     async def render_logout_page(self):
         self.redirect('/php/logout.php', permanent=False)

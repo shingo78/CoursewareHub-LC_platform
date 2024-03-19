@@ -3,14 +3,10 @@ import sys
 
 from coursewareuserspawner import CoursewareUserSpawner
 from jinja2 import Environment, BaseLoader
-from jupyterhub.handlers.static import CacheControlStaticFilesHandler
 from traitlets import Unicode
 from tornado import web
 
-from .builder import BuildHandler, DefaultCourseImageHandler
 from .registry import get_registry, split_image_name
-from .images import ImagesHandler
-from .logs import LogsHandler
 
 
 class Repo2DockerSpawner(CoursewareUserSpawner):
@@ -111,11 +107,11 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
         image_names = [
             f'{registry_host}/{image["image_name"]}'
             for image in images
-	]
+        ]
 
         self.log.debug(
             "check_allowed: allowed_images=%s specifying image=%s",
-	    image_names, image)
+            image_names, image)
 
         if image not in image_names:
             raise web.HTTPError(400, "Specifying image to launch is not allowed")
@@ -184,28 +180,10 @@ def cwh_repo2docker_jupyterhub_config(
     # hub
     c.JupyterHub.spawner_class = Repo2DockerSpawner
 
-    # add extra templates for the service UI
-    #c.JupyterHub.template_paths.insert(
-    #    0, os.path.join(os.path.dirname(__file__), "templates")
-    #)
-
     c.DockerSpawner.cmd = ["jupyterhub-singleuser"]
 
-    # register the handlers to manage the user images
-    #c.JupyterHub.extra_handlers.extend(
-    #    [
-    #        (r"environments", ImagesHandler),
-    #        (r"api/environments", BuildHandler),
-    #        (r"api/environments/default-course-image", DefaultCourseImageHandler),
-    #        (r"api/environments/([^/]+)/logs", LogsHandler),
-    #        (
-    #            r"environments-static/(.*)",
-    #            CacheControlStaticFilesHandler,
-    #            {"path": os.path.join(os.path.dirname(__file__), "static")},
-    #        ),
-    #    ]
-    #)
     if custom_menu:
+        # add extra templates for the service UI
         c.JupyterHub.template_paths.insert(
             0, os.path.join(os.path.dirname(__file__), "custom_templates")
         )
@@ -223,7 +201,7 @@ def cwh_repo2docker_jupyterhub_config(
     if debug:
         service_command.extend([
             "--debug"
-	])
+        ])
 
     environ_names = [
         'CONTAINER_IMAGE',
@@ -248,5 +226,5 @@ def cwh_repo2docker_jupyterhub_config(
         "display": not custom_menu,
         "oauth_no_confirm": True,
         "environment": environments,
-	"oauth_client_allowed_scopes": ["inherit"]
+        "oauth_client_allowed_scopes": ["inherit"]
     }])

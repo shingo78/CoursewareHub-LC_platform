@@ -29,12 +29,7 @@ class BaseHandler(web.RequestHandler):
             prefix=self.settings['base_url'],
             service_prefix=self.settings['service_prefix'],
             user=user,
-            #login_url=self.settings['login_url'],
-            #login_service=self.authenticator.login_service,
-            #logout_url=self.settings['logout_url'],
             static_url=self.static_url,
-            #version_hash=self.version_hash,
-            #services=self.get_accessible_services(user),
             no_spawner_check=True
         )
         return ns
@@ -51,4 +46,3 @@ class BaseHandler(web.RequestHandler):
             self.log.error("Couldn't parse JSON", exc_info=True)
             raise web.HTTPError(400, 'Invalid JSON in body of request')
         return model
-

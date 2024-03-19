@@ -1,28 +1,21 @@
-import json
 import os
 from urllib.parse import urlparse
 
 from tornado import web
-from tornado.log import app_log
 from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop
 
-from traitlets import (
-    Unicode,
-    default
-)
+from traitlets import Unicode
 from traitlets.config import Application, catch_config_error
 
-from jupyterhub.services.auth import HubOAuthCallbackHandler, HubOAuthenticated
+from jupyterhub.services.auth import HubOAuthCallbackHandler
 from jupyterhub.utils import url_path_join
-from jupyterhub.handlers.static import CacheControlStaticFilesHandler
 from jupyterhub.traitlets import URLPrefix
 from jupyterhub._data import DATA_FILES_PATH
 
 from jinja2 import ChoiceLoader, Environment, FileSystemLoader, PrefixLoader
 
 from .builder import BuildHandler, DefaultCourseImageHandler
-from .registry import get_registry, split_image_name
 from .images import ImagesHandler
 from .logs import LogsHandler
 
@@ -47,7 +40,7 @@ class CwhRepo2DockerApplication(Application):
         self.load_config_file(self.config_file)
 
     async def start(self):
-        self.io_loop = loop = IOLoop.current()
+        self.io_loop = IOLoop.current()
 
         base_url = os.environ['JUPYTERHUB_BASE_URL']
         service_prefix = os.environ['JUPYTERHUB_SERVICE_PREFIX']
@@ -106,7 +99,7 @@ class CwhRepo2DockerApplication(Application):
                 (url_path_join(service_prefix, r"static/(.*)"),
                     web.StaticFileHandler,
                     {
-                        "path": os.path.join(os.path.dirname(__file__), "static")
+                        "path": static_path
                     }
                  )
             ],

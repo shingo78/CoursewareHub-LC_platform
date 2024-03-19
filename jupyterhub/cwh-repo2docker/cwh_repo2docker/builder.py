@@ -2,8 +2,6 @@ import json
 import re
 
 from aiodocker import Docker, DockerError
-from jupyterhub.apihandlers import APIHandler
-from jupyterhub.scopes import needs_scope
 from jupyterhub.services.auth import HubOAuthenticated
 from tornado import web
 
@@ -20,7 +18,6 @@ class BuildHandler(HubOAuthenticated, BaseHandler):
     """
 
     @web.authenticated
-    #@needs_scope('admin-ui')
     async def delete(self):
         data = self.get_json_body()
         name = data["name"]
@@ -43,7 +40,6 @@ class BuildHandler(HubOAuthenticated, BaseHandler):
         self.finish(json.dumps({"status": "ok"}))
 
     @web.authenticated
-    #@needs_scope('admin-ui')
     async def post(self):
         data = self.get_json_body()
         repo = data["repo"]
@@ -89,7 +85,6 @@ class DefaultCourseImageHandler(HubOAuthenticated, BaseHandler):
     """
 
     @web.authenticated
-    #@needs_scope('admin-ui')
     async def put(self):
         data = self.get_json_body()
         name = data["name"]

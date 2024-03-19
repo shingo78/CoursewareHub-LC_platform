@@ -1,9 +1,5 @@
-from inspect import isawaitable
 from jupyterhub.services.auth import HubOAuthenticated
-from jupyterhub.scopes import needs_scope
 from tornado import web
-from tornado.log import app_log
-import json
 
 from .docker import list_containers
 from .registry import get_registry
@@ -16,9 +12,7 @@ class ImagesHandler(HubOAuthenticated, BaseHandler):
     """
 
     @web.authenticated
-    #@needs_scope('admin-ui')
     async def get(self):
-        self.log.debug("current_user:%s", self.current_user)
         registry = get_registry(config=self.settings['config'])
         images = await registry.list_images()
         containers = await list_containers()
@@ -27,4 +21,3 @@ class ImagesHandler(HubOAuthenticated, BaseHandler):
             images=images + containers
         )
         self.write(await result)
-

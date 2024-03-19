@@ -1,9 +1,7 @@
 import json
 
 from aiodocker import Docker
-from jupyterhub.apihandlers import APIHandler
 from jupyterhub.services.auth import HubOAuthenticated
-from jupyterhub.utils import admin_only
 from tornado import web
 from tornado.iostream import StreamClosedError
 
@@ -15,7 +13,6 @@ class LogsHandler(HubOAuthenticated, BaseHandler):
     Expose a handler to follow the build logs.
     """
     @web.authenticated
-    #@admin_only
     async def get(self, name):
         self.set_header("Content-Type", "text/event-stream")
         self.set_header("Cache-Control", "no-cache")
