@@ -1,4 +1,4 @@
-FROM jupyterhub/jupyterhub:4.0 AS builder
+FROM jupyterhub/jupyterhub:5.2 AS builder
 
 # dev tools
 RUN apt-get update && \
