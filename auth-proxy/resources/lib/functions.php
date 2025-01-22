@@ -1,7 +1,9 @@
 <?php
 require_once __DIR__ . '/hub-const.php';
 require_once __DIR__ . '/const.php';
-require_once __DIR__ . '/../simplesamlphp/public/_include.php';
+if (defined('_SERVER')) {
+   require_once __DIR__ . '/../simplesamlphp/public/_include.php';
+}
 
 $SESSION_NAME = session_name();
 
