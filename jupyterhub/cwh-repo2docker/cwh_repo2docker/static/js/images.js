@@ -1,10 +1,9 @@
 require([
-  "jquery", "bootstrap", "moment", "jhapi", "utils",
+  "jquery", "moment", "jhapi", "utils",
   "static/vendor/xterm-addon-fit.js",
   "static/vendor/xterm.js"
 ], function(
   $,
-  bs,
   moment,
   JHAPI,
   utils,
