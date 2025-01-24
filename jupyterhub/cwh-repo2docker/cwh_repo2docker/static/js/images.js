@@ -127,6 +127,8 @@ require([
     var image = row.data("image");
     var dialog = $("#show-logs-dialog");
 
+    dialog.find(".modal-dialog").addClass("modal-lg");
+
     var log = new xterm.Terminal({
       convertEol: true,
       disableStdin: true
