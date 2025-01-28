@@ -342,7 +342,6 @@ class CoursewareUserSpawner(SwarmSpawner):
             USER_ID=self.user_id, # deprecated
             NB_UID=self.user_id,
             HOME=self.homedir,
-            JUPYTER_RUNTIME_DIR='/var/tmp/jupyter/runtime',
         ))
         # Fix 20180802
         if self._is_admin():
