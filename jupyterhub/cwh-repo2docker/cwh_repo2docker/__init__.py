@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 
 from coursewareuserspawner import CoursewareUserSpawner
@@ -29,7 +30,7 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
         {% for image in image_list %}
         <label for='image-item-{{ loop.index0 }}' class='form-control input-group'>
             <div class='col-md-1'>
-                {% if image.default_course_image %}
+                {% if image.selected %}
                 <input type='radio' name='image' id='image-item-{{ loop.index0 }}' value='{{ registry_host }}/{{ image.image_name }}' checked/>
                 {% else %}
                 <input type='radio' name='image' id='image-item-{{ loop.index0 }}' value='{{ registry_host }}/{{ image.image_name }}' />
@@ -81,19 +82,59 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
 
         self._registry = get_registry(config=self.config)
 
+        self._course_dir = None
+        self._course_image = None
+
+    @property
+    def course_dir(self):
+        return self._course_dir
+
+    @course_dir.setter
+    def course_dir(self, value):
+        if value is not None:
+            value = re.sub(r'[^\w\-_\.]', '_', value)
+        self._course_dir = value
+
+    @property
+    def course_image(self):
+        return self._course_image
+
+    @course_image.setter
+    def course_image(self, value):
+        self._course_image = value
+
+    @property
+    def workdir(self):
+        workdir = self.homedir
+        if self.course_dir:
+            if not workdir.endswith('/'):
+                workdir = workdir + '/'
+            workdir = workdir + self.course_dir
+        return workdir
+
     async def get_options_form(self):
         """
         Override the default form to handle the case when there is only one image.
         """
         images = await self._registry.list_images()
+        image_dict = {i['image_name']: i for i in images}
 
         if not self.user.admin:
-            self._use_default_course_image(images)
+            if self.course_image and self.course_image in image_dict:
+                self.image = self.course_image
+            else:
+                self._use_default_course_image(images)
             return ''
 
         if len(images) <= 1:
             self._use_initial_course_image(images)
             return ''
+
+        for i in images:
+            if self.course_image and self.course_image in image_dict:
+                i['selected'] = (i['image_name'] == self.course_image)
+            else:
+                i['selected'] = i['default_coruse_image']
 
         image_form_template = Environment(loader=BaseLoader).from_string(
             self.image_form_template

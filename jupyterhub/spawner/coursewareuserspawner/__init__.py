@@ -237,9 +237,16 @@ class CoursewareUserSpawner(SwarmSpawner):
     @property
     def homedir(self):
         """
-        Path to the user's home directory in the docker image.
+        Path to the user's home directory in the single-user server container.
         """
         return self.image_homedir_format_string.format(username=self.user.name)
+
+    @property
+    def workdir(self):
+        """
+        Path to the working directory in the single-user server container.
+        """
+        return self.homedir
 
     @property
     def mounts(self):
@@ -424,7 +431,10 @@ class CoursewareUserSpawner(SwarmSpawner):
     def create_object(self):
         # systemuser image must be started as root
         # relies on NB_UID and NB_USER handling in docker-stacks
-        self.extra_container_spec = {'workdir': self.homedir, 'user': '0'}
+        self.extra_container_spec = {
+            'workdir': self.workdir,
+            'user': '0'
+        }
 
         return (yield super(CoursewareUserSpawner, self).create_object())
 

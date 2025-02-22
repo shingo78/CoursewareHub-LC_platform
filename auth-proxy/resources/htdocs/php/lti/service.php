@@ -44,10 +44,19 @@ if ($launch->is_resource_launch()) {
     $data = $custom = $launch->get_launch_data();
     $custom_key = 'https://purl.imsglobal.org/spec/lti/claim/custom';
     $notebook = null;
+    $server_name = null;
+    $login_params = array();
     if (isset($data[$custom_key])) {
         $custom = $data[$custom_key];
         if (isset($custom['notebook'])) {
             $notebook = $custom['notebook'];
+        }
+        if (isset($custom['course-server'])) {
+            $login_params['course-server'] = $custom['course-server'];
+            $server_name = $custom['course-server'];
+        }
+        if (isset($custom['course-image'])) {
+            $login_params['course_image'] = $custom['course-image'];
         }
         if (isset($custom['logout-redirect-url'])) {
             $logout_redirect_url = $custom['logout-redirect-url'];
@@ -56,13 +65,30 @@ if ($launch->is_resource_launch()) {
             $_SESSION['logout-redirect-url'] = $logout_redirect_url;
         }
     }
-    header("X-Accel-Redirect: /entrance/");
+    $next = null;
     if ($notebook) {
-        $notebook = rawurlencode($notebook);
-        header("X-Reproxy-URL: ".HUB_URL.'/'.COURSE_NAME."/hub/login?next=/user-redirect/notebooks/".$notebook);
-    } else {
-        header("X-Reproxy-URL: ".HUB_URL.'/'.COURSE_NAME."/hub/login");
+        $next = "/user-redirect/notebooks/".$notebook;
     }
+    if ($server_name) {
+        $spawn_url = '/hub/spawn/'.$username.'/'.$server_name;
+        if ($next) {
+            $query = http_build_query(['next' => $next], '', null, PHP_QUERY_RFC3986);
+            $next = $spawn_url.'?'.$query;
+        } else {
+            $next = $spawn_url;
+        }
+    }
+    if ($next) {
+        $login_params['next'] = $next;
+    }
+
+    header("X-Accel-Redirect: /entrance/");
+    $reproxy_url = HUB_URL.'/'.COURSE_NAME."/hub/login";
+    $query = http_build_query($login_params, '', null, PHP_QUERY_RFC3986);
+    if ($query) {
+        $reproxy_url = $reproxy_url.'?'.$query;
+    }
+    header("X-Reproxy-URL: $reproxy_url");
     header("X-REMOTE-USER: $username");
 } else if ($launch->is_deep_link_launch()) {
     error_log('Deep linking launch type');

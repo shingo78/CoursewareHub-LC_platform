@@ -8,6 +8,8 @@ from coursewareuserspawner.traitlets import ResourceAllocation
 from cwh_repo2docker import cwh_repo2docker_jupyterhub_config
 from jupyterhub.handlers import LogoutHandler
 from jhub_remote_user_authenticator.remote_user_auth import RemoteUserLocalAuthenticator
+from jhub_remote_user_authenticator.remote_user_auth import RemoteUserLoginHandler
+
 
 # Configuration file for jupyterhub.
 
@@ -25,17 +27,40 @@ c.DockerSpawner.host_ip = "0.0.0.0"
 c.DockerSpawner.image = f'{registry_host}/{initial_image}'
 c.DockerSpawner.network_name = os.environ['BACKEND_NETWORK']
 
+c.JupyterHub.allow_named_servers = True
+
+
+class CoursewareHubLoginHandler(RemoteUserLoginHandler):
+
+    async def get(self):
+        course_server = self.get_query_argument('course-server', None)
+        course_image = self.get_query_argument('course-image', None)
+
+        await super().get()
+
+        user = self.current_user
+        self.log.debug("course_image: %s, user=%s", course_image, user.name)
+        self.log.debug("course_server: %s, user=%s", course_server, user.name)
+
+        if course_dir:
+            spawner = user.get_spawner(course_server, replace_failed=True)
+            spawner.course_dir = course_server
+            spawner.course_image = course_image
+
+
 class CoursewareHubLogoutHandler(LogoutHandler):
+
     async def render_logout_page(self):
         self.redirect('/php/logout.php', permanent=False)
 
+
 class CoursewareHubRemoteUserLocalAuthenticator(RemoteUserLocalAuthenticator):
+
     def get_handlers(self, app):
-        handlers = super().get_handlers(app)
-        handlers.append(
+        return [
+            (r'/login', CoursewareHubLoginHandler),
             (r'/logout', CoursewareHubLogoutHandler)
-        )
-        return handlers
+        ]
 
 c.JupyterHub.authenticator_class = CoursewareHubRemoteUserLocalAuthenticator
 c.LocalAuthenticator.create_system_users = True
@@ -120,6 +145,8 @@ if 'JUPYTERHUB_SINGLEUSER_APP' in os.environ:
     }
 
 notebook_args = []
+
+singleuser_default_url = None
 
 if 'JUPYTERHUB_SINGLEUSER_DEFAULT_URL' in os.environ:
     singleuser_default_url = os.environ['JUPYTERHUB_SINGLEUSER_DEFAULT_URL']
