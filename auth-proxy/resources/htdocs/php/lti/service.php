@@ -56,7 +56,7 @@ if ($launch->is_resource_launch()) {
             $server_name = $custom['course-server'];
         }
         if (isset($custom['course-image'])) {
-            $login_params['course_image'] = $custom['course-image'];
+            $login_params['course-image'] = $custom['course-image'];
         }
         if (isset($custom['logout-redirect-url'])) {
             $logout_redirect_url = $custom['logout-redirect-url'];
