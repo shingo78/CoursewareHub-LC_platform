@@ -134,7 +134,7 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
             if self.course_image and self.course_image in image_dict:
                 i['selected'] = (i['image_name'] == self.course_image)
             else:
-                i['selected'] = i['default_coruse_image']
+                i['selected'] = i['default_course_image']
 
         image_form_template = Environment(loader=BaseLoader).from_string(
             self.image_form_template
