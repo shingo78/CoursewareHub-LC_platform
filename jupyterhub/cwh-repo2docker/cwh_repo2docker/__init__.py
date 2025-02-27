@@ -121,7 +121,7 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
 
         if not self.user.admin:
             if self.course_image and self.course_image in image_dict:
-                self.image = self.course_image
+                self.image = self._registry.get_full_image_name(self.course_image)
             else:
                 self._use_default_course_image(images)
             return ''
