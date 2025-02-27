@@ -32,11 +32,11 @@ c.JupyterHub.allow_named_servers = True
 
 class CoursewareHubLoginHandler(RemoteUserLoginHandler):
 
-    async def get(self):
+    def get(self):
         course_server = self.get_query_argument('course-server', None)
         course_image = self.get_query_argument('course-image', None)
 
-        await super().get()
+        super().get()
 
         user = self.current_user
         self.log.debug("course_image: %s, user=%s", course_image, user.name)
