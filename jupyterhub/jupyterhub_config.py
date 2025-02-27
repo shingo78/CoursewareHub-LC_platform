@@ -42,7 +42,7 @@ class CoursewareHubLoginHandler(RemoteUserLoginHandler):
         self.log.debug("course_image: %s, user=%s", course_image, user.name)
         self.log.debug("course_server: %s, user=%s", course_server, user.name)
 
-        if course_dir:
+        if course_server:
             spawner = user.get_spawner(course_server, replace_failed=True)
             spawner.course_dir = course_server
             spawner.course_image = course_image
