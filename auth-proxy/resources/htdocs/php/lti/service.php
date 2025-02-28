@@ -68,9 +68,9 @@ if ($launch->is_resource_launch()) {
     $next = null;
     if ($notebook) {
         if ($server_name) {
-             $next = "/user-redirect/".$server_name."/notebooks/".$notebook;
+             $next = "/user/".$username."/".$server_name."/notebooks/".$notebook;
         } else {
-             $next = "/user-redirect/notebooks/".$notebook;
+             $next = "/user/".$username."/notebooks/".$notebook;
         }
     }
     if ($server_name) {
