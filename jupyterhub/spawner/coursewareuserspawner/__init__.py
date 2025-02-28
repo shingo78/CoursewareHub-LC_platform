@@ -307,7 +307,7 @@ class CoursewareUserSpawner(SwarmSpawner):
                 read_only=False
             )
         )
-        for dirname in ['{textbook_dir}', '{info_dir}']:
+        for dirname in ['{textbookdir}', '{infodir}']:
             mounts.append(
                 Mount(
                     type="bind",
