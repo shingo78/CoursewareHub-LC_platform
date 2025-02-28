@@ -87,7 +87,7 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
 
     @property
     def course_dir(self):
-        if self._couse_dir is not None:
+        if self._course_dir is not None:
             return self._course_dir
 
         for server_name, spawner in self.user.spawners.items():
