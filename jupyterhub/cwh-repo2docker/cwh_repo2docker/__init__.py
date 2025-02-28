@@ -82,11 +82,19 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
 
         self._registry = get_registry(config=self.config)
 
-        self._course_dir = None
+        self._course_dir = ''
         self._course_image = None
 
     @property
     def course_dir(self):
+        if self._couse_dir is not None:
+            return self._course_dir
+
+        for server_name, spawner in self.user.spawners.items():
+            if spawner == self:
+                self._course_dir = re.sub(r'[^\w\-_\.]', '_', server_name)
+                break
+
         return self._course_dir
 
     @course_dir.setter
@@ -111,6 +119,18 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
                 workdir = workdir + '/'
             workdir = workdir + self.course_dir
         return workdir
+
+    @property
+    def textbook_dir(self):
+        if self.course_dir:
+            return 'textbook/' + self.course_dir
+        return 'textbook'
+
+    @property
+    def info_dir(self):
+        if self.course_dir:
+            return 'info/' + self.course_dir
+        return 'info'
 
     async def get_options_form(self):
         """
@@ -200,7 +220,34 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
 
         return cmd + self.get_args()
 
+    def _make_course_dirs(self):
+        if not self.course_dir:
+            return
+
+        admin_dirs = [
+            os.path.join(self.admin_data_dir, self.textbook_dir),
+            os.path.join(self.admin_data_dir, self.info_dir)
+        ]
+
+        home_dir = os.path.join(self.users_dir, self.user.name)
+        course_dir = os.path.join(self.users_dir, self.user.name,
+                                  self.course_dir)
+
+        for dirpath in admin_dirs:
+            self._make_dirs(dirpath, 0o777, 0, 0)
+
+        statinfo = os.stat(home_dir)
+        self._make_dirs(course_dir, 0o755, statinfo.st_uid, statinfo.st_gid)
+
+    def _make_dirs(self, dirpath, mode, uid, gid):
+        if os.path.exists(dirpath):
+            return
+
+        os.mkdir(dirpath, mode)
+        os.chown(uid, gid)
+
     async def create_object(self, *args, **kwargs):
+        self._make_course_dirs()
         self.docker(
             'login',
             username=self._registry.username,

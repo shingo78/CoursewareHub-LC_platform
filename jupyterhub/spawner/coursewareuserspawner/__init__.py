@@ -234,6 +234,19 @@ class CoursewareUserSpawner(SwarmSpawner):
         )
     )
 
+    users_dir = Unicode(
+        "/jupyter/users",
+        config=True,
+        help="Base path of users' home directory"
+    )
+
+    admin_data_dir = Unicode(
+        "/jupyter/admin",
+        config=True,
+        help="Path of admin data directory"
+    )
+
+
     @property
     def homedir(self):
         """
@@ -247,6 +260,14 @@ class CoursewareUserSpawner(SwarmSpawner):
         Path to the working directory in the single-user server container.
         """
         return self.homedir
+
+    @property
+    def textbook_dir(self):
+        return 'textbook'
+
+    @property
+    def info_dir(self):
+        return 'info'
 
     @property
     def mounts(self):
@@ -268,7 +289,7 @@ class CoursewareUserSpawner(SwarmSpawner):
         mounts.append(
             Mount(
                 type="bind",
-                target='{homedir}',
+                target='{workdir}',
                 source='/jupyter/users/{username}',
                 read_only=False
             )
@@ -281,17 +302,17 @@ class CoursewareUserSpawner(SwarmSpawner):
         mounts.append(
             Mount(
                 type="bind",
-                target='{homedir}/admin_tools',
+                target='{workdir}/admin_tools',
                 source='/jupyter/admin/admin_tools',
                 read_only=False
             )
         )
-        for dirname in ['textbook', 'info']:
+        for dirname in ['{textbook_dir}', '{info_dir}']:
             mounts.append(
                 Mount(
                     type="bind",
                     target=os.path.join('/home/jupyter', dirname),
-                    source=os.path.join('/jupyter/admin', dirname),
+                    source=os.path.join(self.admin_data_dir, dirname),
                     read_only=False
                 )
             )
@@ -299,7 +320,7 @@ class CoursewareUserSpawner(SwarmSpawner):
             Mount(
                 type="bind",
                 target='/home/jupyter/workspace',
-                source='/jupyter/users',
+                source=self.users_dir,
                 read_only=False
             )
         )
@@ -307,7 +328,7 @@ class CoursewareUserSpawner(SwarmSpawner):
             Mount(
                 type="bind",
                 target='/jupyter/admin',
-                source='/jupyter/admin',
+                source=self.admin_data_dir,
                 read_only=False
             )
         )
@@ -316,12 +337,12 @@ class CoursewareUserSpawner(SwarmSpawner):
     @default('non_admin_mounts')
     def _default_non_admin_mounts(self):
         mounts = []
-        for dirname in ['textbook', 'tools', 'info']:
+        for dirname in ['tools', '{textbookdir}', '{infodir}']:
             mounts.append(
                 Mount(
                     type="bind",
-                    target='{homedir}/' + dirname,
-                    source=os.path.join('/jupyter/admin', dirname),
+                    target='{workdir}/' + dirname,
+                    source=os.path.join(self.admin_data_dir, dirname),
                     read_only=True
                 )
             )
@@ -330,7 +351,10 @@ class CoursewareUserSpawner(SwarmSpawner):
     def _expand_user_properties(self, template):
         return template.format(
             homedir=self.homedir,
-            username=self.user.name
+            workdir=self.workdir,
+            username=self.user.name,
+            textbookdir=self.textbook_dir,
+            infodir=self.info_dir,
         )
 
     def _expand_mount_properties(self, m):
