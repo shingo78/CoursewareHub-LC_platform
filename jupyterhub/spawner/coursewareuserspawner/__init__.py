@@ -289,7 +289,7 @@ class CoursewareUserSpawner(SwarmSpawner):
         mounts.append(
             Mount(
                 type="bind",
-                target='{workdir}',
+                target='{homedir}',
                 source='/jupyter/users/{username}',
                 read_only=False
             )
