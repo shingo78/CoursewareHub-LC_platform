@@ -67,7 +67,11 @@ if ($launch->is_resource_launch()) {
     }
     $next = null;
     if ($notebook) {
-        $next = "/user-redirect/notebooks/".$notebook;
+        if ($server_name) {
+             $next = "/user-redirect/".$server_name."/notebooks/".$notebook;
+        } else {
+             $next = "/user-redirect/notebooks/".$notebook;
+        }
     }
     if ($server_name) {
         $spawn_url = '/hub/spawn/'.$username.'/'.$server_name;
