@@ -244,7 +244,7 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
             return
 
         os.mkdir(dirpath, mode)
-        os.chown(uid, gid)
+        os.chown(dirpath, uid, gid)
 
     async def create_object(self, *args, **kwargs):
         self._make_course_dirs()
