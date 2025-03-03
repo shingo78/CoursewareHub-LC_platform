@@ -213,7 +213,7 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
         xsrf_cookie_path = base_url + 'user/' + username + '/'
         args.append(
                 '--ServerApp.tornado_settings='
-                '{"xsrf_cookie_kwargs":\'{"path": "'
+                '\'{"xsrf_cookie_kwargs": {"path": "'
                 + xsrf_cookie_path + '"}}\'')
 
         return args
