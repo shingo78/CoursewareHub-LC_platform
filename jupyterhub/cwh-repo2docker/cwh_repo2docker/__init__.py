@@ -7,6 +7,7 @@ from coursewareuserspawner import CoursewareUserSpawner
 from jinja2 import Environment, BaseLoader
 from traitlets import (
     List,
+    Tuple,
     Unicode,
 )
 from tornado import web
