@@ -92,11 +92,11 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
     )
 
     textbook_mount_dirs = List(
+        trait=Tuple(Unicode(), Unicode()),
         default_value=[
             ('textbook{coursedir}', 'textbook'),
             ('info{coursedir}', 'info')
         ],
-        trait=CoursewareUserSpawner.textbook_mount_dirs.trait,
         **CoursewareUserSpawner.textbook_mount_dirs.metadata
     )
 
