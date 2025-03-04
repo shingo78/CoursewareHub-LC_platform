@@ -368,18 +368,6 @@ class CoursewareUserSpawner(SwarmSpawner):
             )
         return mounts
 
-    def template_namespace(self):
-        d = super().template_namespace()
-
-        course_dir = ''
-        if self.course_dir:
-            course_dir = '/' + self.course_dir
-
-        d.update(dict(
-            coursedir=course_dir
-        ))
-        return d
-
     def _expand_mount_properties(self, m):
         m = copy(m)
         for k, v in m.items():
