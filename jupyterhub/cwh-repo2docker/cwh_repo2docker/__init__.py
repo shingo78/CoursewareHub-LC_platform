@@ -2,9 +2,13 @@ import os
 import re
 import sys
 
+from jupyterhub.spawner import Spawner
 from coursewareuserspawner import CoursewareUserSpawner
 from jinja2 import Environment, BaseLoader
-from traitlets import Unicode
+from traitlets import (
+    List,
+    Unicode,
+)
 from tornado import web
 
 from .registry import get_registry, split_image_name
@@ -77,6 +81,25 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
         """,
     )
 
+    notebook_dir = Unicode(
+        '/home/{username}{coursedir}',
+        **Spawner.notebook_dir.metadata
+    )
+
+    workdir = Unicode(
+        '/home/{username}{coursedir}',
+        **CoursewareUserSpawner.workdir.metadata
+    )
+
+    textbook_mount_dirs = List(
+        default_value=[
+            ('textbook{coursedir}', 'textbook'),
+            ('info{coursedir}', 'info')
+        ],
+        trait=CoursewareUserSpawner.textbook_mount_dirs.trait,
+        **CoursewareUserSpawner.textbook_mount_dirs.metadata
+    )
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -92,7 +115,7 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
 
         for server_name, spawner in self.user.spawners.items():
             if spawner == self:
-                self._course_dir = re.sub(r'[^\w\-_\.]', '_', server_name)
+                self.course_dir = server_name
                 break
 
         return self._course_dir
@@ -101,6 +124,8 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
     def course_dir(self, value):
         if value is not None:
             value = re.sub(r'[^\w\-_\.]', '_', value)
+        if value and value.endswith('/'):
+            value = value[:-1]
         self._course_dir = value
 
     @property
@@ -111,26 +136,17 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
     def course_image(self, value):
         self._course_image = value
 
-    @property
-    def workdir(self):
-        workdir = self.homedir
-        if self.course_dir:
-            if not workdir.endswith('/'):
-                workdir = workdir + '/'
-            workdir = workdir + self.course_dir
-        return workdir
+    def template_namespace(self):
+        d = super().template_namespace()
 
-    @property
-    def textbook_dir(self):
+        course_dir = ''
         if self.course_dir:
-            return 'textbook/' + self.course_dir
-        return 'textbook'
+            course_dir = '/' + self.course_dir
 
-    @property
-    def info_dir(self):
-        if self.course_dir:
-            return 'info/' + self.course_dir
-        return 'info'
+        d.update(dict(
+            coursedir=course_dir
+        ))
+        return d
 
     async def get_options_form(self):
         """
@@ -240,13 +256,12 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
             return
 
         admin_dirs = [
-            os.path.join(self.admin_data_dir, self.textbook_dir),
-            os.path.join(self.admin_data_dir, self.info_dir)
+            os.path.join(self.admin_data_dir, 'textbook', self.course_dir),
+            os.path.join(self.admin_data_dir, 'info', self.course_dir)
         ]
 
         home_dir = os.path.join(self.users_dir, self.user.name)
-        course_dir = os.path.join(self.users_dir, self.user.name,
-                                  self.course_dir)
+        course_dir = os.path.join(home_dir, self.course_dir)
 
         for dirpath in admin_dirs:
             self._make_dirs(dirpath, 0o777, 0, 0)
@@ -255,10 +270,10 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
         self._make_dirs(course_dir, 0o755, statinfo.st_uid, statinfo.st_gid)
 
     def _make_dirs(self, dirpath, mode, uid, gid):
-        if os.path.exists(dirpath):
-            return
-
-        os.mkdir(dirpath, mode)
+        try:
+            os.mkdir(dirpath, mode)
+        except FileExistsError:
+            pass
         os.chown(dirpath, uid, gid)
 
     async def create_object(self, *args, **kwargs):

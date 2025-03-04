@@ -10,6 +10,7 @@ from traitlets import (
     Unicode,
     List,
     Dict,
+    Tuple,
     default
 )
 from .traitlets import ResourceAllocationTrait
@@ -30,15 +31,28 @@ def get_user_id_default(spawner):
 
 class CoursewareUserSpawner(SwarmSpawner):
 
-    image_homedir_format_string = Unicode(
+    homedir = Unicode(
         "/home/{username}",
         config=True,
         help=dedent(
             """
             Format string for the path to the user's home directory
-            inside the image.  The format string should include a
-            `username` variable, which will be formatted with the
-            user's username.
+            inside the single-user container.
+            The format string should include a `username` variable,
+            which will be formatted with the user's username.
+            """
+        )
+    )
+
+    workdir = Unicode(
+        "/home/{username}",
+        config=True,
+        help=dedent(
+            """
+            Format string for the path to the user's working directory
+            inside the single-user container.
+            The format string should include a `username` variable,
+            which will be formatted with the user's username.
             """
         )
     )
@@ -80,6 +94,34 @@ class CoursewareUserSpawner(SwarmSpawner):
 
             - {username} is expanded to the jupyterhub username
             - {homedir} is expanded to user's home directory in a container
+            """
+        )
+    )
+
+    textbook_dirs = List(
+        config=True,
+        trait=Unicode(),
+        default_value=['textbook', 'info'],
+        help=dedent(
+            """
+            List of directory contains textbook notebooks.
+            The item is relative path from admin_data_dir.
+            If override admin_mounts this config is ignored.
+            """
+        )
+    )
+
+    textbook_mount_dirs = List(
+        config=True,
+        trait=Tuple(Unicode(), Unicode()),
+        default_value=[('textbook', 'textbook'), ('info', 'info')],
+        help=dedent(
+            """
+            List of mount configurations for directory contains textbook notebooks.
+            The item is tupple like (source, mount point).
+            The mount point is relative path from home directory.
+            The source is relative path from admin_data_dir.
+            If override non_admin_mounts this config is ignored.
             """
         )
     )
@@ -246,29 +288,6 @@ class CoursewareUserSpawner(SwarmSpawner):
         help="Path of admin data directory"
     )
 
-
-    @property
-    def homedir(self):
-        """
-        Path to the user's home directory in the single-user server container.
-        """
-        return self.image_homedir_format_string.format(username=self.user.name)
-
-    @property
-    def workdir(self):
-        """
-        Path to the working directory in the single-user server container.
-        """
-        return self.homedir
-
-    @property
-    def textbook_dir(self):
-        return 'textbook'
-
-    @property
-    def info_dir(self):
-        return 'info'
-
     @property
     def mounts(self):
         mounts = []
@@ -289,7 +308,7 @@ class CoursewareUserSpawner(SwarmSpawner):
         mounts.append(
             Mount(
                 type="bind",
-                target='{homedir}',
+                target=self.homedir,
                 source='/jupyter/users/{username}',
                 read_only=False
             )
@@ -302,12 +321,12 @@ class CoursewareUserSpawner(SwarmSpawner):
         mounts.append(
             Mount(
                 type="bind",
-                target='{workdir}/admin_tools',
+                target=self.homedir + '/admin_tools',
                 source='/jupyter/admin/admin_tools',
                 read_only=False
             )
         )
-        for dirname in ['{textbookdir}', '{infodir}']:
+        for dirname in self.textbook_dirs:
             mounts.append(
                 Mount(
                     type="bind",
@@ -337,31 +356,35 @@ class CoursewareUserSpawner(SwarmSpawner):
     @default('non_admin_mounts')
     def _default_non_admin_mounts(self):
         mounts = []
-        for dirname in ['tools', '{textbookdir}', '{infodir}']:
+        mount_dirs = [('tools', 'tools')] + self.textbook_mount_dirs
+        for mountpoint, source in mount_dirs:
             mounts.append(
                 Mount(
                     type="bind",
-                    target='{workdir}/' + dirname,
-                    source=os.path.join(self.admin_data_dir, dirname),
+                    target=os.path.join(self.homedir, mountpoint),
+                    source=os.path.join(self.admin_data_dir, source),
                     read_only=True
                 )
             )
         return mounts
 
-    def _expand_user_properties(self, template):
-        return template.format(
-            homedir=self.homedir,
-            workdir=self.workdir,
-            username=self.user.name,
-            textbookdir=self.textbook_dir,
-            infodir=self.info_dir,
-        )
+    def template_namespace(self):
+        d = super().template_namespace()
+
+        course_dir = ''
+        if self.course_dir:
+            course_dir = '/' + self.course_dir
+
+        d.update(dict(
+            coursedir=course_dir
+        ))
+        return d
 
     def _expand_mount_properties(self, m):
         m = copy(m)
         for k, v in m.items():
             if isinstance(v, str):
-                m[k] = self._expand_user_properties(v)
+                m[k] = self.format_string(v)
         return m
 
     def get_env(self):
@@ -372,8 +395,8 @@ class CoursewareUserSpawner(SwarmSpawner):
             NB_USER=self.user.name,
             USER_ID=self.user_id, # deprecated
             NB_UID=self.user_id,
-            HOME=self.homedir,
-            REPO_DIR=self.homedir,
+            HOME=self.format_string(self.homedir),
+            REPO_DIR=self.format_string(self.homedir),
         ))
         # Fix 20180802
         if self._is_admin():
@@ -456,7 +479,7 @@ class CoursewareUserSpawner(SwarmSpawner):
         # systemuser image must be started as root
         # relies on NB_UID and NB_USER handling in docker-stacks
         self.extra_container_spec = {
-            'workdir': self.workdir,
+            'workdir': self.format_string(self.workdir),
             'user': '0'
         }
 
