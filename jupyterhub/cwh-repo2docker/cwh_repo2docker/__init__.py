@@ -102,12 +102,12 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
     )
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
         self._registry = get_registry(config=self.config)
 
         self._course_dir = ''
         self._course_image = None
+
+        super().__init__(*args, **kwargs)
 
     @property
     def course_dir(self):
