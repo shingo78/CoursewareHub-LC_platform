@@ -211,6 +211,9 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
         username = self.user.name
         base_url = self.hub.base_url[:-4]
         xsrf_cookie_path = base_url + 'user/' + username + '/'
+        # workaround when jupyterhub<=4.1.5 is used on single-user server
+        # https://github.com/jupyterhub/jupyterhub/pull/4750
+        # https://github.com/jupyterhub/jupyterhub/pull/4771
         args.append(
                 '--ServerApp.tornado_settings='
                 '{"xsrf_cookie_kwargs":{"path":"'
