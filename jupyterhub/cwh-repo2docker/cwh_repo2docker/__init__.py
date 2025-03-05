@@ -92,14 +92,22 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
         **CoursewareUserSpawner.workdir.metadata
     )
 
-    non_admin_mount_dirs = List(
+    admin_home_mount_dirs = List(
+        trait=Tuple(Unicode(), Unicode()),
+        default_value=[
+            ('{cousedir}/admin_tools', 'admin_tools')
+        ],
+        **CoursewareUserSpawner.admin_data_mount_dirs.metadata
+    )
+
+    non_admin_home_mount_dirs = List(
         trait=Tuple(Unicode(), Unicode()),
         default_value=[
             ('{coursedir}/tools', 'tools'),
             ('{coursedir}/textbook', 'textbook/{coursedir}'),
             ('{coursedir}/info', 'info/{coursedir}')
         ],
-        **CoursewareUserSpawner.non_admin_mount_dirs.metadata
+        **CoursewareUserSpawner.non_admin_home_mount_dirs.metadata
     )
 
     def __init__(self, *args, **kwargs):

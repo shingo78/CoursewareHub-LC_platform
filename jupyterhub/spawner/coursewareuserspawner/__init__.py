@@ -98,7 +98,7 @@ class CoursewareUserSpawner(SwarmSpawner):
         )
     )
 
-    admin_mount_dirs = List(
+    admin_data_mount_dirs = List(
         config=True,
         trait=Tuple(Unicode(), Unicode()),
         default_value=[
@@ -117,7 +117,25 @@ class CoursewareUserSpawner(SwarmSpawner):
         )
     )
 
-    non_admin_mount_dirs = List(
+    admin_home_mount_dirs = List(
+        config=True,
+        trait=Tuple(Unicode(), Unicode()),
+        default_value=[
+            ('admin_tools', 'admin_tools')
+        ],
+        help=dedent(
+            """
+            List of directories to mount in the admin's single-user container.
+            The item is tupple like (source, mount point).
+            The mount point is relative path from home directory
+            inside the single-user container.
+            The source is relative path from admin_data_dir.
+            If override admin_mounts this config is ignored.
+            """
+        )
+    )
+
+    non_admin_home_mount_dirs = List(
         config=True,
         trait=Tuple(Unicode(), Unicode()),
         default_value=[
@@ -330,15 +348,16 @@ class CoursewareUserSpawner(SwarmSpawner):
     @default('admin_mounts')
     def _default_admin_mounts(self):
         mounts = []
-        mounts.append(
-            Mount(
-                type="bind",
-                target=self.homedir + '/admin_tools',
-                source='/jupyter/admin/admin_tools',
-                read_only=False
+        for mountpoint, source in self.admin_home_mount_dirs:
+            mounts.append(
+                Mount(
+                    type="bind",
+                    target=os.path.join(self.homedir, mountpoint),
+                    source=os.path.join(self.admin_data_dir, source),
+                    read_only=False
+                )
             )
-        )
-        for mountpoint, source in self.admin_mount_dirs:
+        for mountpoint, source in self.admin_data_mount_dirs:
             mounts.append(
                 Mount(
                     type="bind",
@@ -368,7 +387,7 @@ class CoursewareUserSpawner(SwarmSpawner):
     @default('non_admin_mounts')
     def _default_non_admin_mounts(self):
         mounts = []
-        for mountpoint, source in self.non_admin_mount_dirs:
+        for mountpoint, source in self.non_admin_home_mount_dirs:
             mounts.append(
                 Mount(
                     type="bind",
