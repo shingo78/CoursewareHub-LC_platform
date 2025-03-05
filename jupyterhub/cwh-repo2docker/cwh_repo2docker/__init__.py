@@ -282,11 +282,13 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
         server_name = self.get_server_name()
         if self.course_dir == '' and server_name != '':
             self.course_dir = server_name
+        notebook_dir = self.format_string(self.notebook_dir)
+        workdir = self.format_string(self.workdir)
         self.log.debug(
                 f"create_object: server_name='{server_name}'"
-                f" course_dir={self.course_dir}"
-                f" notebook_dir={self.notebook_dir}"
-                f" workdir={self.workdir}"
+                f" course_dir='{self.course_dir}'"
+                f" notebook_dir={notebook_dir}"
+                f" workdir={workdir}"
                 f" image='{self.image}'")
 
         self._make_course_dirs()
