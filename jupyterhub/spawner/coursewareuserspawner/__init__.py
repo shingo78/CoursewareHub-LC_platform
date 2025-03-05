@@ -311,7 +311,7 @@ class CoursewareUserSpawner(SwarmSpawner):
         else:
             mounts.extend(self.non_admin_mounts)
             mounts.extend(self.extra_non_admin_mounts)
-        mounts = [self._expand_mount_properties(m) for m in mounts]
+        mounts = [self._render_mount_properties(m) for m in mounts]
         return sorted(mounts, key=lambda v: v['Target'])
 
     @default('user_mounts')
@@ -342,10 +342,8 @@ class CoursewareUserSpawner(SwarmSpawner):
             mounts.append(
                 Mount(
                     type="bind",
-                    target=os.path.normpath(
-                        os.path.join('/home/jupyter', mountpoint)),
-                    source=os.path.normpath(
-                        os.path.join(self.admin_data_dir, source)),
+                    target=os.path.join('/home/jupyter', mountpoint),
+                    source=os.path.join(self.admin_data_dir, source),
                     read_only=False
                 )
             )
@@ -374,20 +372,21 @@ class CoursewareUserSpawner(SwarmSpawner):
             mounts.append(
                 Mount(
                     type="bind",
-                    target=os.path.normpath(
-                        os.path.join(self.homedir, mountpoint)),
-                    source=os.path.normpath(
-                        os.path.join(self.admin_data_dir, source)),
+                    target=os.path.join(self.homedir, mountpoint),
+                    source=os.path.join(self.admin_data_dir, source),
                     read_only=True
                 )
             )
         return mounts
 
-    def _expand_mount_properties(self, m):
+    def _render_mount_properties(self, m):
         m = copy(m)
         for k, v in m.items():
             if isinstance(v, str):
-                m[k] = self.format_string(v)
+                v = self.format_string(v)
+                if k == 'Source' or k == 'Target':
+                    v = os.path.normpath(v)
+                m[k] = v
         return m
 
     def get_env(self):

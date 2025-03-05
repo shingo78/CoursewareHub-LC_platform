@@ -39,8 +39,8 @@ class CoursewareHubLoginHandler(RemoteUserLoginHandler):
         super().get()
 
         user = self.current_user
-        self.log.debug("course_image: %s, user=%s", course_image, user.name)
         self.log.debug("course_server: %s, user=%s", course_server, user.name)
+        self.log.debug("course_image: %s, user=%s", course_image, user.name)
 
         if course_server:
             spawner = user.get_spawner(course_server, replace_failed=True)

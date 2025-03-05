@@ -110,16 +110,16 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
 
         self._registry = get_registry(config=self.config)
 
+    def get_server_name(self):
+        server_name = ''
+        for name, spawner in self.user.spawners.items():
+            if spawner == self:
+                server_name = name
+                break
+        return server_name
+
     @property
     def course_dir(self):
-        if self._course_dir is not None:
-            return self._course_dir
-
-        for server_name, spawner in self.user.spawners.items():
-            if spawner == self:
-                self.course_dir = server_name
-                break
-
         return self._course_dir
 
     @course_dir.setter
@@ -143,7 +143,7 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
 
         course_dir = ''
         if self.course_dir:
-            course_dir = '/' + self.course_dir
+            course_dir = self.course_dir
 
         d.update(dict(
             coursedir=course_dir
@@ -279,6 +279,16 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
         os.chown(dirpath, uid, gid)
 
     async def create_object(self, *args, **kwargs):
+        server_name = self.get_server_name()
+        if self.course_dir == '' and server_name != '':
+            self.course_dir = server_name
+        self.log.debug(
+                f"create_object: server_name='{server_name}'"
+                f" course_dir={self.course_dir}"
+                f" notebook_dir={self.notebook_dir}"
+                f" workdir={self.workdir}"
+                f" image='{self.image}'")
+
         self._make_course_dirs()
         self.docker(
             'login',
