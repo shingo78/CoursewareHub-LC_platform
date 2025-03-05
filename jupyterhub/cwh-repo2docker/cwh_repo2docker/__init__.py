@@ -95,7 +95,7 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
     admin_home_mount_dirs = List(
         trait=Tuple(Unicode(), Unicode()),
         default_value=[
-            ('{cousedir}/admin_tools', 'admin_tools')
+            ('{coursedir}/admin_tools', 'admin_tools')
         ],
         **CoursewareUserSpawner.admin_data_mount_dirs.metadata
     )
