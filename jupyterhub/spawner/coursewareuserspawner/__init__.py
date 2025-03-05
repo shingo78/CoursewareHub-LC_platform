@@ -98,28 +98,40 @@ class CoursewareUserSpawner(SwarmSpawner):
         )
     )
 
-    textbook_dirs = List(
+    admin_mount_dirs = List(
         config=True,
-        trait=Unicode(),
-        default_value=['textbook', 'info'],
+        trait=Tuple(Unicode(), Unicode()),
+        default_value=[
+            ('textbook', 'textbook'),
+            ('info', 'info')
+        ],
         help=dedent(
             """
-            List of directory contains textbook notebooks.
-            The item is relative path from admin_data_dir.
+            List of directories to mount in the admin's single-user container.
+            The item is tupple like (source, mount point).
+            The mount point is relative path from /home/jupyer
+            inside the single-user container.
+            The source is relative path from admin_data_dir.
             If override admin_mounts this config is ignored.
             """
         )
     )
 
-    textbook_mount_dirs = List(
+    non_admin_mount_dirs = List(
         config=True,
         trait=Tuple(Unicode(), Unicode()),
-        default_value=[('textbook', 'textbook'), ('info', 'info')],
+        default_value=[
+            ('tools', 'tools'),
+            ('textbook', 'textbook'),
+            ('info', 'info')
+        ],
         help=dedent(
             """
-            List of mount configurations for directory contains textbook notebooks.
+            List of directories to mount in the non-admin's
+            single-user container.
             The item is tupple like (source, mount point).
-            The mount point is relative path from home directory.
+            The mount point is relative path from home directory
+            inside the single-user container.
             The source is relative path from admin_data_dir.
             If override non_admin_mounts this config is ignored.
             """
@@ -326,12 +338,14 @@ class CoursewareUserSpawner(SwarmSpawner):
                 read_only=False
             )
         )
-        for dirname in self.textbook_dirs:
+        for mountpoint, source in self.admin_mount_dirs:
             mounts.append(
                 Mount(
                     type="bind",
-                    target=os.path.join('/home/jupyter', dirname),
-                    source=os.path.join(self.admin_data_dir, dirname),
+                    target=os.path.normpath(
+                        os.path.join('/home/jupyter', mountpoint)),
+                    source=os.path.normpath(
+                        os.path.join(self.admin_data_dir, source)),
                     read_only=False
                 )
             )
@@ -356,13 +370,14 @@ class CoursewareUserSpawner(SwarmSpawner):
     @default('non_admin_mounts')
     def _default_non_admin_mounts(self):
         mounts = []
-        mount_dirs = [('tools', 'tools')] + self.textbook_mount_dirs
-        for mountpoint, source in mount_dirs:
+        for mountpoint, source in self.non_admin_mount_dirs:
             mounts.append(
                 Mount(
                     type="bind",
-                    target=os.path.join(self.homedir, mountpoint),
-                    source=os.path.join(self.admin_data_dir, source),
+                    target=os.path.normpath(
+                        os.path.join(self.homedir, mountpoint)),
+                    source=os.path.normpath(
+                        os.path.join(self.admin_data_dir, source)),
                     read_only=True
                 )
             )
