@@ -262,7 +262,7 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
         if self.user.admin:
             home_dir = os.path.join(self.users_dir, self.user.name)
             dirs.extend([
-                os.path.join(home_dir, 'textbook')
+                os.path.join(home_dir, 'textbook'),
                 os.path.join(home_dir, 'info')
             ])
 
@@ -285,7 +285,7 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
         ]
         if self.user.admin:
             course_dirs.extend([
-                os.path.join(home_dir, self.course_dir, 'textbook')
+                os.path.join(home_dir, self.course_dir, 'textbook'),
                 os.path.join(home_dir, self.course_dir, 'info')
             ])
 
