@@ -253,7 +253,24 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
 
         return cmd + self.get_args()
 
-    def _make_course_dirs(self):
+    def _make_user_dirs(self):
+        if self.course_dir:
+            return
+
+        home_dir = os.path.join(self.users_dir, self.user.name)
+        dirs = []
+        if self.user.admin:
+            home_dir = os.path.join(self.users_dir, self.user.name)
+            dirs.extend([
+                os.path.join(home_dir, 'textbook')
+                os.path.join(home_dir, 'info')
+            ])
+
+        statinfo = os.stat(home_dir)
+        for dirpath in dirs:
+            self._make_dir(dirpath, 0o755, statinfo.st_uid, statinfo.st_gid)
+
+    def _make_user_course_dirs(self):
         if not self.course_dir:
             return
 
@@ -263,15 +280,23 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
         ]
 
         home_dir = os.path.join(self.users_dir, self.user.name)
-        course_dir = os.path.join(home_dir, self.course_dir)
+        course_dirs = [
+            os.path.join(home_dir, self.course_dir)
+        ]
+        if self.user.admin:
+            course_dirs.extend([
+                os.path.join(home_dir, self.course_dir, 'textbook')
+                os.path.join(home_dir, self.course_dir, 'info')
+            ])
 
         for dirpath in admin_dirs:
-            self._make_dirs(dirpath, 0o777, 0, 0)
+            self._make_dir(dirpath, 0o777, 0, 0)
 
         statinfo = os.stat(home_dir)
-        self._make_dirs(course_dir, 0o755, statinfo.st_uid, statinfo.st_gid)
+        for dirpath in course_dirs:
+            self._make_dir(dirpath, 0o755, statinfo.st_uid, statinfo.st_gid)
 
-    def _make_dirs(self, dirpath, mode, uid, gid):
+    def _make_dir(self, dirpath, mode, uid, gid):
         try:
             os.mkdir(dirpath, mode)
         except FileExistsError:
@@ -291,7 +316,9 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
                 f" workdir={workdir}"
                 f" image='{self.image}'")
 
-        self._make_course_dirs()
+        self._make_user_dirs()
+        self._make_user_course_dirs()
+
         self.docker(
             'login',
             username=self._registry.username,
