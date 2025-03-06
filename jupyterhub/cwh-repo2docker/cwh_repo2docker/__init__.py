@@ -291,14 +291,20 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
         course_dirs = [
             os.path.join(home_dir, self.course_dir)
         ]
+
         if self.user.admin:
             course_dirs.extend([
                 os.path.join(home_dir, self.course_dir, 'textbook'),
                 os.path.join(home_dir, self.course_dir, 'info')
             ])
 
-        for dirpath in admin_dirs:
-            self._make_dir(dirpath, 0o777, 0, 0)
+            for dirpath in admin_dirs:
+                self._make_dir(dirpath, 0o777, 0, 0)
+        else:
+            if any([not os.path.exists(d) for d in admin_dirs]:
+                raise RuntimeError(
+                    'The course content directories do not yet exist:'
+                    ' course_dir={self.course_dir}')
 
         statinfo = os.stat(home_dir)
         for dirpath in course_dirs:
