@@ -292,8 +292,8 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
             if any([not os.path.exists(d) for d in admin_dirs]):
                 raise web.HTTPError(
                     403,
-                    'The course content directories do not yet exist:'
-                    ' course_dir={self.course_dir}')
+                    f'The course content directories do not yet exist:'
+                    f' course_dir={self.course_dir}')
 
         statinfo = os.stat(home_dir)
         for dirpath in course_dirs:
