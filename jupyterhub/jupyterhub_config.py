@@ -44,7 +44,6 @@ class CoursewareHubLoginHandler(RemoteUserLoginHandler):
 
         if course_server:
             spawner = user.get_spawner(course_server, replace_failed=True)
-            spawner.course_dir = course_server
             spawner.course_image = course_image
 
 

@@ -111,7 +111,6 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
     )
 
     def __init__(self, *args, **kwargs):
-        self._course_dir = ''
         self._course_image = None
 
         super().__init__(*args, **kwargs)
@@ -120,15 +119,9 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
 
     @property
     def course_dir(self):
-        return self._course_dir
-
-    @course_dir.setter
-    def course_dir(self, value):
-        if value is not None:
-            value = re.sub(r'[^\w\-_\.]', '_', value)
-        if value and value.endswith('/'):
-            value = value[:-1]
-        self._course_dir = value
+        course_dir = self.name
+        course_dir = re.sub(r'[^\w\-_\.\(\)\+\[\]\{\}@]', '_', course_dir)
+        return course_dir
 
     @property
     def course_image(self):
@@ -141,12 +134,8 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
     def template_namespace(self):
         d = super().template_namespace()
 
-        course_dir = ''
-        if self.course_dir:
-            course_dir = self.course_dir
-
         d.update(dict(
-            coursedir=course_dir
+            coursedir=self.course_dir
         ))
         return d
 
@@ -253,6 +242,13 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
 
         return cmd + self.get_args()
 
+    def get_env(self):
+        env = super().get_env()
+        env.update(dict(
+            CWH_COURSE_NAME = self.course_dir
+        ))
+        return env
+
     def _make_user_dirs(self):
         if self.course_dir:
             return
@@ -311,13 +307,12 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
 
     async def create_object(self, *args, **kwargs):
         server_name = self.name
-        if self.course_dir == '' and server_name != '':
-            self.course_dir = server_name
+        course_dir = self.course_dir
         notebook_dir = self.format_string(self.notebook_dir)
         workdir = self.format_string(self.workdir)
         self.log.debug(
                 f"create_object: server_name='{server_name}'"
-                f" course_dir='{self.course_dir}'"
+                f" course_dir='{course_dir}'"
                 f" notebook_dir={notebook_dir}"
                 f" workdir={workdir}"
                 f" image='{self.image}'")
