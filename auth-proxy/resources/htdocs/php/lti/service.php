@@ -21,7 +21,7 @@ try {
     exit;
 }
 
-$launch_data = $mail_address = $launch->get_launch_data();
+$launch_data = $launch->get_launch_data();
 $issuer = $launch_data['iss'];
 if (!isset($launch_data['email'])) {
     error_log("Could not receive email address: issuer=$issuer");
@@ -41,13 +41,12 @@ if ($launch->is_resource_launch()) {
     $_SESSION['authtype'] = 'lti';
     $_SESSION['iss'] = $issuer;
 
-    $data = $custom = $launch->get_launch_data();
     $custom_key = 'https://purl.imsglobal.org/spec/lti/claim/custom';
     $notebook = null;
     $server_name = null;
     $login_params = array();
-    if (isset($data[$custom_key])) {
-        $custom = $data[$custom_key];
+    if (isset($launch_data[$custom_key])) {
+        $custom = $launch_data[$custom_key];
         if (isset($custom['notebook'])) {
             $notebook = $custom['notebook'];
         }
