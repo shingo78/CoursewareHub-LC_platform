@@ -6,8 +6,8 @@ from jhub_remote_user_authenticator.remote_user_auth import RemoteUserLoginHandl
 class CoursewareHubLoginHandler(RemoteUserLoginHandler):
 
     def get(self):
-        course_server = self.get_query_argument('course-server', None)
-        course_image = self.get_query_argument('course-image', None)
+        course_server = self.get_query_argument('course_server', None)
+        course_image = self.get_query_argument('course_image', None)
 
         super().get()
 

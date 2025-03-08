@@ -50,12 +50,12 @@ if ($launch->is_resource_launch()) {
         if (isset($custom['notebook'])) {
             $notebook = $custom['notebook'];
         }
-        if (isset($custom['course-server'])) {
-            $login_params['course-server'] = $custom['course-server'];
-            $server_name = $custom['course-server'];
+        if (isset($custom['course_server'])) {
+            $login_params['course_server'] = $custom['course_server'];
+            $server_name = $custom['course_server'];
         }
-        if (isset($custom['course-image'])) {
-            $login_params['course-image'] = $custom['course-image'];
+        if (isset($custom['course_image'])) {
+            $login_params['course_image'] = $custom['course_image'];
         }
         if (isset($custom['logout-redirect-url'])) {
             $logout_redirect_url = $custom['logout-redirect-url'];
