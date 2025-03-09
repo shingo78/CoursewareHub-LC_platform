@@ -256,48 +256,47 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
         home_dir = os.path.join(self.users_dir, self.user.name)
         dirs = []
         if self.user.admin:
-            home_dir = os.path.join(self.users_dir, self.user.name)
             dirs.extend([
-                os.path.join(home_dir, 'textbook'),
-                os.path.join(home_dir, 'info')
+                (os.path.join(home_dir, 'textbook'), 0o777),
+                (os.path.join(home_dir, 'info'), 0o777)
             ])
 
         statinfo = os.stat(home_dir)
-        for dirpath in dirs:
-            self._make_dir(dirpath, 0o755, statinfo.st_uid, statinfo.st_gid)
+        for dirpath, mode in dirs:
+            self._make_dir(dirpath, mode, statinfo.st_uid, statinfo.st_gid)
 
     def _make_user_course_dirs(self):
         if not self.course_dir:
             return
 
-        admin_dirs = [
+        content_dirs = [
             os.path.join(self.admin_data_dir, 'textbook', self.course_dir),
             os.path.join(self.admin_data_dir, 'info', self.course_dir)
         ]
 
         home_dir = os.path.join(self.users_dir, self.user.name)
         course_dirs = [
-            os.path.join(home_dir, self.course_dir)
+            (os.path.join(home_dir, self.course_dir), 0o755)
         ]
 
         if self.user.admin:
             course_dirs.extend([
-                os.path.join(home_dir, self.course_dir, 'textbook'),
-                os.path.join(home_dir, self.course_dir, 'info')
+                (os.path.join(home_dir, self.course_dir, 'textbook'), 0o777),
+                (os.path.join(home_dir, self.course_dir, 'info'), 0o777)
             ])
 
-            for dirpath in admin_dirs:
+            for dirpath in content_dirs:
                 self._make_dir(dirpath, 0o777, 0, 0)
         else:
-            if any([not os.path.exists(d) for d in admin_dirs]):
+            if any([not os.path.exists(d) for d in content_dirs]):
                 raise web.HTTPError(
                     403,
                     'You are not permitted to create a new course, "%s".',
                     self.course_dir)
 
         statinfo = os.stat(home_dir)
-        for dirpath in course_dirs:
-            self._make_dir(dirpath, 0o755, statinfo.st_uid, statinfo.st_gid)
+        for dirpath, mode in course_dirs:
+            self._make_dir(dirpath, mode, statinfo.st_uid, statinfo.st_gid)
 
     def _make_dir(self, dirpath, mode, uid, gid):
         try:
