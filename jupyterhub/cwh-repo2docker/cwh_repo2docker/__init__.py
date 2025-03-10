@@ -245,7 +245,7 @@ class Repo2DockerSpawner(CoursewareUserSpawner):
     def get_env(self):
         env = super().get_env()
         env.update(dict(
-            CWH_COURSE_NAME = self.course_dir
+            CWH_COURSE_NAME=self.course_dir
         ))
         return env
 
