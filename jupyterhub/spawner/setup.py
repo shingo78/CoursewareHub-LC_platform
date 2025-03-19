@@ -41,8 +41,7 @@ setup_args = dict(
     long_description    = "Spawn single-user servers with Docker.",
     platforms           = "Linux, Mac OS X",
     install_requires    = [
-        # 'requests-unixsocket @ git+https://github.com/NII-cloud-operation/requests-unixsocket.git',
-        'requests-unixsocket @ git+https://github.com/shingo78/requests-unixsocket.git@fix/requests-v2.32.x-compatibility#egg=requests-unixsocket',
+        'requests-unixsocket',
         'dockerspawner'
     ],
     cmdclass = {
