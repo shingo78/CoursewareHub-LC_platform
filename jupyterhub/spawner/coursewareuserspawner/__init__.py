@@ -417,8 +417,11 @@ class CoursewareUserSpawner(SwarmSpawner):
             USER_ID=self.user_id, # deprecated
             NB_UID=self.user_id,
             HOME=self.format_string(self.homedir),
-            REPO_DIR=self.format_string(self.homedir),
         ))
+        if os.environ.get('DEBUG', 'no') in ['yes', '1']:
+            env.update(dict(
+                REPO_DIR=self.homedir,
+            ))
         # Fix 20180802
         if self._is_admin():
             env['GRANT_SUDO'] = 'yes'
